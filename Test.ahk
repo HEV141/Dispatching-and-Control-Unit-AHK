@@ -32,6 +32,31 @@ PuttySend(WatchText, Command)
 	ClipBoard := ""
 }
 
+PuttyRead(BeginText, EndText)
+{
+	Sleep, 100
+	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
+	ClipBoard := ""
+	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic ; [title] = PuTTY - not working with global var
+	ClipWait
+	Loop, parse, Clipboard, `n, `r    ; gets the last line of text from the clipboard
+		{
+			If A_LoopField
+				{
+					PuttyText := A_LoopField
+				}
+		}
+	MsgBox, %PuttyText%
+	BeginPos := InStr(PuttyText, BeginText)
+	EndPos := InStr(PuttyText, EndText)
+	MsgBox, %BeginPos% %EndPos%
+	if (BeginPos != 0 and EndPos !=0)
+		MidText := SubStr(PuttyText, (BeginPos+StrLen(BeginText)), (EndPos-(BeginPos+StrLen(BeginText))))
+	MsgBox, %MidText%
+	ClipBoard := ""
+}
+
+
 ^1:: ; todo
 	WinWait, PuTTY Fatal Error, ,3
 		Send, {Enter}
@@ -58,4 +83,8 @@ return
 	PuttySend("~#", "ifdown wan2")
 	PuttySend("~#", "ping 8.8.8.8 -c 3")
 	
+return
+
+^0::
+	PuttyRead("root","Wrt")
 return
