@@ -14,10 +14,10 @@ PuttySend(WatchText, Command)
 		PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic ; [title] = PuTTY - not working with global var
 		ClipWait
 		Loop, parse, Clipboard, `n, `r    ; gets the last line of text from the clipboard
-			{
-				If A_LoopField
-					PuttyText := A_LoopField
-			}
+		{
+			If A_LoopField
+				PuttyText := A_LoopField
+		}
 		PuttyText := SubStr(PuttyText, -(StrLen(WatchText)-1)) ; cut end of the line and check to match with WatchText
 		If (PuttyText != WatchText)	; need because AHK executing too fast and picking up whole context of previous line
 			Continue				; also proper response to random lag (in theory)
@@ -25,34 +25,41 @@ PuttySend(WatchText, Command)
 			Break
 	}
 	If (PuttyText = WatchText)
-		{
-			Send, %Command%
-			Send, {Enter}
-		}
+	{
+		Send, %Command%
+		Send, {Enter}
+	}
 	ClipBoard := ""
 }
 
 PuttyRead(BeginText, EndText)
 {
+	Array := []
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 	ClipBoard := ""
 	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic ; [title] = PuTTY - not working with global var
 	ClipWait
 	Loop, parse, Clipboard, `n, `r    ; gets the last line of text from the clipboard
+	{
+		If A_LoopField
 		{
-			If A_LoopField
-				{
-					PuttyText := A_LoopField
-				}
+			PuttyText := A_LoopField
+			BeginPos := InStr(PuttyText, BeginText)
+			EndPos := InStr(PuttyText, EndText)
+			if (BeginPos != 0 and EndPos != 0)
+			{
+				MidText := SubStr(PuttyText, (BeginPos+StrLen(BeginText)), (EndPos-(BeginPos+StrLen(BeginText))))
+				Array.Push(MidText)
+			}
 		}
-	MsgBox, %PuttyText%
-	BeginPos := InStr(PuttyText, BeginText)
-	EndPos := InStr(PuttyText, EndText)
-	MsgBox, %BeginPos% %EndPos%
-	if (BeginPos != 0 and EndPos !=0)
-		MidText := SubStr(PuttyText, (BeginPos+StrLen(BeginText)), (EndPos-(BeginPos+StrLen(BeginText))))
-	MsgBox, %MidText%
+	}
+
+	for index, element in Array ; Enumeration is the recommended approach in most cases.
+	{
+		MsgBox % "Element №" index " is " element
+	}
+
 	ClipBoard := ""
 }
 
@@ -86,5 +93,5 @@ return
 return
 
 ^0::
-	PuttyRead("root","Wrt")
+	PuttyRead("time="," ms")
 return
