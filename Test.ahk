@@ -4,6 +4,8 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #SingleInstance Force
 
+CaptureData := []
+
 PuttySend(WatchText, Command)
 {
 	Loop
@@ -34,7 +36,7 @@ PuttySend(WatchText, Command)
 
 PuttyRead(BeginText, EndText)
 {
-	Data := []
+	global CaptureData := []
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 	ClipBoard := ""
@@ -52,23 +54,26 @@ PuttyRead(BeginText, EndText)
 			if (BeginPos != 0 and EndPos != 0)
 			{
 				MidText := SubStr(PuttyText, (BeginPos+StrLen(BeginText)), (EndPos-(BeginPos+StrLen(BeginText))))
-				Data.Push(MidText)
+				CaptureData.Push(MidText)
 			}
 		}
 	}
 
-	for index, element in Data ; Enumeration is the recommended approach in most cases.
-	{
-		MsgBox % "Element №" index " is " element
-		Data[index] := Data[index] + 0
-		Sum += Data[index]
-		MsgBox % "Sum " Sum
-	}
-	MsgBox % "Arf " Arf := Sum/max(index)
-
 	ClipBoard := ""
 }
 
+Arf()
+{
+	global CaptureData
+	for index, element in CaptureData ; Enumeration is the recommended approach in most cases.
+	{
+		MsgBox % "Element №" index " is " element
+		CaptureData[index] := CaptureData[index] + 0
+		Sum += CaptureData[index]
+		MsgBox % "Sum " Sum
+	}
+	MsgBox % "Arf " Arf := Sum/max(index)
+}
 
 ^1:: ; todo
 	WinWait, PuTTY Fatal Error, ,3
@@ -100,4 +105,5 @@ return
 
 ^0::
 	PuttyRead("time="," ms")
+	Arf()
 return
