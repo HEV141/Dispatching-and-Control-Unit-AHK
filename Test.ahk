@@ -43,7 +43,6 @@ PuttyRead(BeginText, EndText)
 	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
 	ClipWait
 	Cut := SubStr(Clipboard, -650)
-	MsgBox % Cut
 	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
 	{
 		If A_LoopField
@@ -62,17 +61,16 @@ PuttyRead(BeginText, EndText)
 	ClipBoard := ""
 }
 
-Arf()
+CaptureArf()
 {
 	global CaptureData
 	for index, element in CaptureData ; Enumeration is the recommended approach in most cases.
 	{
-		MsgBox % "Element №" index " is " element
 		CaptureData[index] := CaptureData[index] + 0
 		Sum += CaptureData[index]
-		MsgBox % "Sum " Sum
 	}
-	MsgBox % "Arf " Arf := Sum/max(index)
+	Arf := Sum/max(index)
+	return Arf
 }
 
 ^1:: ; todo
@@ -105,5 +103,7 @@ return
 
 ^0::
 	PuttyRead("time="," ms")
-	Arf()
+	Check := CaptureArf()
+	If (Check << 10)
+		MsgBox % "Warning"
 return
