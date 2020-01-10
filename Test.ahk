@@ -11,7 +11,7 @@ PuttySend(WatchText, Command)
 		Sleep, 100
 		SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 		ClipBoard := ""
-		PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic ; [title] = PuTTY - not working with global var
+		PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
 		ClipWait
 		Loop, parse, Clipboard, `n, `r    ; gets the last line of text from the clipboard
 		{
@@ -34,13 +34,15 @@ PuttySend(WatchText, Command)
 
 PuttyRead(BeginText, EndText)
 {
-	Array := []
+	Data := []
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 	ClipBoard := ""
-	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic ; [title] = PuTTY - not working with global var
+	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
 	ClipWait
-	Loop, parse, Clipboard, `n, `r    ; gets the last line of text from the clipboard
+	Cut := SubStr(Clipboard, -650)
+	MsgBox % Cut
+	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
 	{
 		If A_LoopField
 		{
@@ -50,15 +52,19 @@ PuttyRead(BeginText, EndText)
 			if (BeginPos != 0 and EndPos != 0)
 			{
 				MidText := SubStr(PuttyText, (BeginPos+StrLen(BeginText)), (EndPos-(BeginPos+StrLen(BeginText))))
-				Array.Push(MidText)
+				Data.Push(MidText)
 			}
 		}
 	}
 
-	for index, element in Array ; Enumeration is the recommended approach in most cases.
+	for index, element in Data ; Enumeration is the recommended approach in most cases.
 	{
 		MsgBox % "Element №" index " is " element
+		Data[index] := Data[index] + 0
+		Sum += Data[index]
+		MsgBox % "Sum " Sum
 	}
+	MsgBox % "Arf " Arf := Sum/max(index)
 
 	ClipBoard := ""
 }
