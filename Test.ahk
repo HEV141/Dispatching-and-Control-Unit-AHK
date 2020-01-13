@@ -96,14 +96,26 @@ return
 	PuttySend("~#", "uci commit")
 	PuttySend("~#", "/etc/init.d/network reload")
 
+WANPing:
 	PuttySend("~#", "ifdown wan2")
 	PuttySend("~#", "ping 8.8.8.8 -c 3")
+	PuttySend("~#", " ")
+
+	WANPingRef := 10 ; 10ms just for debugging
+	
+	PuttyRead("time="," ms")
+	Check := CaptureArf()
+	If (Check > WANPingRef)
+		MsgBox, 0x000236,, % "Warning! `nAverage ping is over " WANPingRef "ms. Continue?"
+			IfMsgBox Cancel
+				return
+			else IfMsgBox TryAgain
+				Goto, WANPing
+			else 
+				MsgBox You pressed Continue
 	
 return
 
 ^0::
-	PuttyRead("time="," ms")
-	Check := CaptureArf()
-	If (Check > 20)
-		MsgBox % "Warning"
+
 return
