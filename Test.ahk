@@ -104,6 +104,6 @@ return
 ^0::
 	PuttyRead("time="," ms")
 	Check := CaptureArf()
-	If (Check << 10)
+	If (Check > 20)
 		MsgBox % "Warning"
 return
