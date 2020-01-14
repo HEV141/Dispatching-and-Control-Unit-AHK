@@ -96,15 +96,14 @@ return
 	PuttySend("~#", "uci commit")
 	PuttySend("~#", "/etc/init.d/network reload")
 
-WANPing:
+	WANPing:
 	PuttySend("~#", "ifdown wan2")
 	PuttySend("~#", "ping 8.8.8.8 -c 3")
 	PuttySend("~#", " ")
-
-	WANPingRef := 10 ; 10ms just for debugging
 	
 	PuttyRead("time="," ms")
 	Check := CaptureArf()
+	WANPingRef := 10 ; 10ms just for debugging
 	If (Check > WANPingRef)
 		MsgBox, 0x000236,, % "Warning! `nAverage ping is over " WANPingRef "ms. Continue?"
 			IfMsgBox Cancel
@@ -112,8 +111,15 @@ WANPing:
 			else IfMsgBox TryAgain
 				Goto, WANPing
 			else 
-				MsgBox You pressed Continue
-	
+				Send, {Enter}
+
+	PuttySend("~#", "wget --no-check-certificate -P /tmp http://4duker.ru/1.bmp")
+
+	PuttySend("~#", "ifup wan2")
+	PuttySend("~#", "ifdown wan")
+	PuttySend("~#", "gcom -d /dev/ttyUSB2")
+	PuttySend("~#", " ")
+
 return
 
 ^0::
