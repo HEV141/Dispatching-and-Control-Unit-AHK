@@ -17,16 +17,16 @@ PuttySend(WatchText, Command)
 		ClipWait
 		Loop, parse, Clipboard, `n, `r    ; gets the last line of text from the clipboard
 		{
-			If A_LoopField
+			if A_LoopField
 				PuttyText := A_LoopField
 		}
 		PuttyText := SubStr(PuttyText, -(StrLen(WatchText)-1)) ; cut end of the line and check to match with WatchText
-		If (PuttyText != WatchText)	; need because AHK executing too fast and picking up whole context of previous line
+		if (PuttyText != WatchText)	; need because AHK executing too fast and picking up whole context of previous line
 			Continue				; also proper response to random lag (in theory)
 		Else
 			Break
 	}
-	If (PuttyText = WatchText)
+	if (PuttyText = WatchText)
 	{
 		Send, %Command%
 		Send, {Enter}
@@ -34,7 +34,7 @@ PuttySend(WatchText, Command)
 	ClipBoard := ""
 }
 
-PuttyRead(BeginText, EndText)
+PuttyCut(BeginText, EndText)
 {
 	global CaptureData := []
 	Sleep, 100
@@ -45,7 +45,7 @@ PuttyRead(BeginText, EndText)
 	Cut := SubStr(Clipboard, -650)
 	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
 	{
-		If A_LoopField
+		if A_LoopField
 		{
 			PuttyText := A_LoopField
 			BeginPos := InStr(PuttyText, BeginText)
@@ -57,7 +57,27 @@ PuttyRead(BeginText, EndText)
 			}
 		}
 	}
+	ClipBoard := ""
+}
 
+PuttyRead(TextToFound)
+{
+	global CaptureData := []
+	Sleep, 100
+	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
+	ClipBoard := ""
+	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
+	ClipWait
+	Cut := SubStr(Clipboard, -650)
+	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
+	{
+		if A_LoopField
+		{
+			PuttyText := A_LoopField
+			if InStr(PuttyText, TextToFound)
+  				return 1
+		}
+	}
 	ClipBoard := ""
 }
 
@@ -101,11 +121,16 @@ return
 	PuttySend("~#", "ping 8.8.8.8 -c 3")
 	PuttySend("~#", " ")
 	
-	PuttyRead("time="," ms")
-	Check := CaptureArf()
+	CheckRead := PuttyRead("Network is unreachable")
+	PuttyCut("time="," ms")
+	CheckCut := CaptureArf()
 	WANPingRef := 10 ; 10ms just for debugging
-	If (Check > WANPingRef)
-		MsgBox, 0x000236,, % "Warning! `nAverage ping is over " WANPingRef "ms. Continue?"
+	if (CheckCut > WANPingRef) or (CheckRead = 1)
+		if (CheckRead = 1)
+			Message := "Warning! `nNetwork error"
+		else
+			Message := "Warning! `nAverage ping is over " WANPingRef "ms."
+		MsgBox, 0x000236,, % Message
 			IfMsgBox Cancel
 				return
 			else IfMsgBox TryAgain
