@@ -121,10 +121,12 @@ return
 	PuttySend("~#", "ping 8.8.8.8 -c 3")
 	PuttySend("~#", " ")
 	
+	CheckRead := 0
 	CheckRead := PuttyRead("Network is unreachable")
 	PuttyCut("time="," ms")
 	CheckCut := CaptureArf()
 	WANPingRef := 10 ; 10ms just for debugging
+
 	if (CheckCut > WANPingRef) or (CheckRead = 1)
 		if (CheckRead = 1)
 			Message := "Warning! `nNetwork error"
@@ -142,8 +144,33 @@ return
 
 	PuttySend("~#", "ifup wan2")
 	PuttySend("~#", "ifdown wan")
+	SIM:
 	PuttySend("~#", "gcom -d /dev/ttyUSB2")
 	PuttySend("~#", " ")
+
+	CheckRead := 0
+	CheckRead := PuttyRead("ERROR")
+
+	if (CheckRead = 1)
+	{
+		MsgBox, 0x000236,, % "Sim error"
+			IfMsgBox Cancel
+				return
+			else IfMsgBox TryAgain
+				Goto, SIM
+			else 
+				Send, {Enter}
+	}
+
+	BlockInput On
+	MsgBox, 0x000040,,% "10 sec delay. `nInput blocked. `nStand by...", 10
+	IfMsgBox Timeout
+	{
+		PuttySend("~#", "ping 8.8.8.8 -c 10")
+		BlockInput Off
+	}
+	else IfMsgBox OK
+		MsgBox You press OK
 
 return
 
