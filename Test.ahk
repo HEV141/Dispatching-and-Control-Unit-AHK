@@ -42,7 +42,7 @@ PuttyCut(BeginText, EndText)
 	ClipBoard := ""
 	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
 	ClipWait
-	Cut := SubStr(Clipboard, -650)
+	Cut := SubStr(Clipboard, -650) ; taking not the whole window, otherwise need to clear the window
 	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
 	{
 		if A_LoopField
@@ -52,7 +52,7 @@ PuttyCut(BeginText, EndText)
 			EndPos := InStr(PuttyText, EndText)
 			if (BeginPos != 0 and EndPos != 0)
 			{
-				MidText := SubStr(PuttyText, (BeginPos+StrLen(BeginText)), (EndPos-(BeginPos+StrLen(BeginText))))
+				MidText := SubStr(PuttyText, (BeginPos+StrLen(BeginText)), (EndPos-(BeginPos+StrLen(BeginText)))) ; extract text between BeginText and EndText
 				CaptureData.Push(MidText)
 			}
 		}
@@ -68,7 +68,7 @@ PuttyRead(TextToFound)
 	ClipBoard := ""
 	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
 	ClipWait
-	Cut := SubStr(Clipboard, -650)
+	Cut := SubStr(Clipboard, -650) ; taking not whole window, otherwise need to clear window
 	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
 	{
 		if A_LoopField
@@ -125,7 +125,7 @@ return
 	CheckRead := PuttyRead("Network is unreachable")
 	PuttyCut("time="," ms")
 	CheckCut := CaptureArf()
-	WANPingRef := 10 ; 10ms just for debugging
+	WANPingRef := 25 
 
 	if (CheckCut > WANPingRef) or (CheckRead = 1)
 		if (CheckRead = 1)
@@ -162,15 +162,31 @@ return
 				Send, {Enter}
 	}
 
+	PingDelay := 10
 	BlockInput On
-	MsgBox, 0x000040,,% "10 sec delay. `nInput blocked. `nStand by...", 10
+	MsgBox, 0x000040,,% PingDelay "sec delay. `nInput blocked. `nStand by...", %PingDelay%
 	IfMsgBox Timeout
 	{
 		PuttySend("~#", "ping 8.8.8.8 -c 10")
 		BlockInput Off
 	}
-	else IfMsgBox OK
-		MsgBox You press OK
+
+	PuttySend("~#", "ifup wan")
+	PuttySend("~#", "ifup wan2")
+	PuttySend("~#", "uci set mspd48.socket.port='9001'")
+	PuttySend("~#", "uci set mspd48.socket.recvtimeout='1000'")
+	PuttySend("~#", "uci set mspd48.socket.address='megafon.techmonitor.ru'")
+	PuttySend("~#", "uci set mspd48.@module[0].enable='1'")
+	PuttySend("~#", "uci commit")
+	PuttySend("~#", "/etc/init.d/mspd48 restart")
+	
+	CheckRead := 0
+	CheckRead := PuttyRead("1990")
+
+	if (CheckRead = 1)
+	{
+		MsgBox, 0x000040,, % "DEVICE IS GOOD"
+	}
 
 return
 
