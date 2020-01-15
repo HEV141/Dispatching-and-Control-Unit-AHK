@@ -123,11 +123,13 @@ return
 	
 	CheckRead := 0
 	CheckRead := PuttyRead("Network is unreachable")
+
 	PuttyCut("time="," ms")
 	CheckCut := CaptureArf()
 	WANPingRef := 25 
 
 	if (CheckCut > WANPingRef) or (CheckRead = 1)
+	{
 		if (CheckRead = 1)
 			Message := "Warning! `nNetwork error"
 		else
@@ -139,6 +141,7 @@ return
 				Goto, WANPing
 			else 
 				Send, {Enter}
+	}
 
 	PuttySend("~#", "wget --no-check-certificate -P /tmp http://4duker.ru/1.bmp")
 
@@ -149,11 +152,20 @@ return
 	PuttySend("~#", " ")
 
 	CheckRead := 0
-	CheckRead := PuttyRead("ERROR")
 
+	if (PuttyRead("ERROR") = 1)
+	{
+		Message := "Sim error"
+		CheckRead := 1
+	}
+	if (PuttyRead("Can't open device /dev/ttyUSB2") = 1)
+	{
+		Message := "GSM module error"
+		CheckRead := 1
+	}
 	if (CheckRead = 1)
 	{
-		MsgBox, 0x000236,, % "Sim error"
+		MsgBox, 0x000236,, % Message
 			IfMsgBox Cancel
 				return
 			else IfMsgBox TryAgain
@@ -164,7 +176,7 @@ return
 
 	PingDelay := 10
 	BlockInput On
-	MsgBox, 0x000040,,% PingDelay "sec delay. `nInput blocked. `nStand by...", %PingDelay%
+	MsgBox, 0x000040,,% PingDelay "sec delay. `nInput blocked. `nStand by...", % PingDelay
 	IfMsgBox Timeout
 	{
 		PuttySend("~#", "ping 8.8.8.8 -c 10")
