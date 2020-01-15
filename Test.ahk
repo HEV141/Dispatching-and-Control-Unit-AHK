@@ -122,18 +122,23 @@ return
 	PuttySend("~#", " ")
 	
 	CheckRead := 0
-	CheckRead := PuttyRead("Network is unreachable")
+	if (PuttyRead("Network is unreachable") = 1)
+	{
+		Message := "Warning! `nNetwork error"
+		CheckRead := 1
+	}
 
 	PuttyCut("time="," ms")
 	CheckCut := CaptureArf()
-	WANPingRef := 25 
-
-	if (CheckCut > WANPingRef) or (CheckRead = 1)
+	WANPingRef := 25
+	if (CheckCut > WANPingRef)
 	{
-		if (CheckRead = 1)
-			Message := "Warning! `nNetwork error"
-		else
-			Message := "Warning! `nAverage ping is over " WANPingRef "ms."
+		Message := "Warning! `nAverage ping is over " WANPingRef "ms."
+		CheckRead := 1
+	}
+
+	if (CheckRead = 1)
+	{
 		MsgBox, 0x000236,, % Message
 			IfMsgBox Cancel
 				return
@@ -152,17 +157,18 @@ return
 	PuttySend("~#", " ")
 
 	CheckRead := 0
-
 	if (PuttyRead("ERROR") = 1)
 	{
 		Message := "Sim error"
 		CheckRead := 1
 	}
+
 	if (PuttyRead("Can't open device /dev/ttyUSB2") = 1)
 	{
 		Message := "GSM module error"
 		CheckRead := 1
 	}
+	
 	if (CheckRead = 1)
 	{
 		MsgBox, 0x000236,, % Message
