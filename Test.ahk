@@ -191,6 +191,7 @@ return
 
 	GSMping:
 	PuttySend("~#", "ping 8.8.8.8 -c 10")
+	PuttySend("~#", " ")
 
 	CheckRead := 0
 	if (PuttyRead("Network is unreachable") = 1)
