@@ -74,6 +74,7 @@ PuttyRead(TextToFound)
 		if A_LoopField
 		{
 			PuttyText := A_LoopField
+			;MsgBox, % PuttyText
 			if InStr(PuttyText, TextToFound)
   				return 1
 		}
@@ -139,7 +140,7 @@ return
 
 	if (CheckRead = 1)
 	{
-		MsgBox, 0x000236,, % Message
+		MsgBox, 0x000136,, % Message
 			IfMsgBox Cancel
 				return
 			else IfMsgBox TryAgain
@@ -159,19 +160,19 @@ return
 	CheckRead := 0
 	if (PuttyRead("ERROR") = 1)
 	{
-		Message := "Sim error"
+		Message := "Warning! `nSim error"
 		CheckRead := 1
 	}
 
 	if (PuttyRead("Can't open device /dev/ttyUSB2") = 1)
 	{
-		Message := "GSM module error"
+		Message := "Warning! `nGSM module error"
 		CheckRead := 1
 	}
-	
+
 	if (CheckRead = 1)
 	{
-		MsgBox, 0x000236,, % Message
+		MsgBox, 0x000136,, % Message
 			IfMsgBox Cancel
 				return
 			else IfMsgBox TryAgain
@@ -185,10 +186,51 @@ return
 	MsgBox, 0x000040,,% PingDelay "sec delay. `nInput blocked. `nStand by...", % PingDelay
 	IfMsgBox Timeout
 	{
-		PuttySend("~#", "ping 8.8.8.8 -c 10")
 		BlockInput Off
 	}
 
+	GSMping:
+	PuttySend("~#", "ping 8.8.8.8 -c 10")
+
+	CheckRead := 0
+	if (PuttyRead("Network is unreachable") = 1)
+	{
+		Message := "Warning! `nNetwork error"
+		CheckRead := 1
+	}
+
+	PuttyCut("time="," ms")
+	CheckCut := CaptureArf()
+	WANPingRef := 600
+	if (CheckCut > WANPingRef)
+	{
+		Message := "Warning! `nAverage ping is over " WANPingRef "ms."
+		CheckRead := 1
+	}
+
+	if (CheckRead = 1)
+	{
+		MsgBox, 0x000136,, % Message
+			IfMsgBox Cancel
+				return
+			else IfMsgBox TryAgain
+				Goto, GSMPing
+			else 
+				Send, {Enter}
+	}
+
+	PuttySend("~#", "ifup wan")
+	PuttySend("~#", "ifup wan2")
+	PuttySend("~#", "uci set mspd48.socket.port='9001'")
+	PuttySend("~#", "uci set mspd48.socket.recvtimeout='1000'")
+	PuttySend("~#", "uci set mspd48.socket.address='megafon.techmonitor.ru'")
+	PuttySend("~#", "uci set mspd48.@module[0].enable='1'")
+	PuttySend("~#", "uci commit")
+	PuttySend("~#", "/etc/init.d/mspd48 restart")
+	
+return
+
+^0::
 	PuttySend("~#", "ifup wan")
 	PuttySend("~#", "ifup wan2")
 	PuttySend("~#", "uci set mspd48.socket.port='9001'")
@@ -201,13 +243,19 @@ return
 	CheckRead := 0
 	CheckRead := PuttyRead("1990")
 
+	Sleep, 2000
+	CheckRead := PuttyRead("1990")
+
+	Sleep, 2000
+	CheckRead := PuttyRead("1990")
+
+	Sleep, 2000
+	CheckRead := PuttyRead("1990")
+
+
 	if (CheckRead = 1)
 	{
 		MsgBox, 0x000040,, % "DEVICE IS GOOD"
 	}
-
-return
-
-^0::
 
 return
