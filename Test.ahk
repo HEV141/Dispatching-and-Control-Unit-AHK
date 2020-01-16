@@ -123,7 +123,7 @@ return
 	PuttySend("~#", " ")
 	
 	CheckRead := 0
-	if (PuttyRead("Network is unreachable") = 1)
+	if ((PuttyRead("Network is unreachable") = 1) or (PuttyRead("Operation not permitted") = 1))
 	{
 		Message := "Warning! `nNetwork error"
 		CheckRead := 1
@@ -193,19 +193,25 @@ return
 	PuttySend("~#", "ping 8.8.8.8 -c 10")
 	PuttySend("~#", " ")
 
-	CheckRead := 0
-	if (PuttyRead("Network is unreachable") = 1)
-	{
-		Message := "Warning! `nNetwork error"
-		CheckRead := 1
-	}
-
 	PuttyCut("time="," ms")
 	CheckCut := CaptureArf()
 	WANPingRef := 600
+	WANPingRefMin := 30
 	if (CheckCut > WANPingRef)
 	{
 		Message := "Warning! `nAverage ping is over " WANPingRef "ms."
+		CheckRead := 1
+	}
+	if (CheckCut < WANPingRefMin) 
+	{
+		Message := "Warning! `nAverage ping is less then " WANPingRefMin "ms.`nCheck if WAN is enable"
+		CheckRead := 1
+	}
+
+	CheckRead := 0
+	if ((PuttyRead("Network is unreachable") = 1) or (PuttyRead("Operation not permitted") = 1))
+	{
+		Message := "Warning! `nNetwork error"
 		CheckRead := 1
 	}
 
@@ -228,6 +234,8 @@ return
 	PuttySend("~#", "uci set mspd48.@module[0].enable='1'")
 	PuttySend("~#", "uci commit")
 	PuttySend("~#", "/etc/init.d/mspd48 restart")
+
+	ClipBoard := ""
 	
 return
 
