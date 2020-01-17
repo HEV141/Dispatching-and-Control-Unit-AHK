@@ -123,7 +123,9 @@ return
 	PuttySend("~#", "uci delete network.lan.gateway")
 	PuttySend("~#", "uci commit")
 	PuttySend("~#", "/etc/init.d/network reload")
+return
 
+^4::
 	Label_WANPing:
 	PuttySend("~#", "ifdown wan2")
 	PuttySend("~#", "ping 8.8.8.8 -c 3")
@@ -155,9 +157,13 @@ return
 			else 
 				Send, {Enter}
 	}
+return
 
-;	PuttySend("~#", "wget --no-check-certificate -P /tmp http://4duker.ru/1.bmp")
+^5::
+	PuttySend("~#", "wget --no-check-certificate -P /tmp http://4duker.ru/1.bmp")
+return
 
+^6::
 	PuttySend("~#", "ifup wan2")
 	PuttySend("~#", "ifdown wan")
 	Label_SIM:
@@ -187,7 +193,9 @@ return
 			else 
 				Send, {Enter}
 	}
+return
 
+^7::
 	PingDelay := 10
 	BlockInput On
 	MsgBox, 0x000040,,% PingDelay "sec delay. `nInput blocked. `nStand by...", % PingDelay
@@ -232,7 +240,9 @@ return
 			else 
 				Send, {Enter}
 	}
+return
 
+^8::
 	PuttySend("~#", "ifup wan")
 	PuttySend("~#", "ifup wan2")
 	PuttySend("~#", "uci set mspd48.socket.port='9001'")
@@ -247,31 +257,11 @@ return
 return
 
 ^0::
-	PuttySend("~#", "ifup wan")
-	PuttySend("~#", "ifup wan2")
-	PuttySend("~#", "uci set mspd48.socket.port='9001'")
-	PuttySend("~#", "uci set mspd48.socket.recvtimeout='1000'")
-	PuttySend("~#", "uci set mspd48.socket.address='megafon.techmonitor.ru'")
-	PuttySend("~#", "uci set mspd48.@module[0].enable='1'")
-	PuttySend("~#", "uci commit")
-	PuttySend("~#", "/etc/init.d/mspd48 restart")
-	
-	CheckRead := 0
-	CheckRead := PuttyRead("1990")
-
-	Sleep, 2000
-	CheckRead := PuttyRead("1990")
-
-	Sleep, 2000
-	CheckRead := PuttyRead("1990")
-
-	Sleep, 2000
-	CheckRead := PuttyRead("1990")
-
-
-	if (CheckRead = 1)
-	{
-		MsgBox, 0x000040,, % "DEVICE IS GOOD"
-	}
-
+	Gosub ^2
+	Gosub ^3
+	Gosub ^4
+	Gosub ^5
+	Gosub ^6
+	Gosub ^7
+	Gosub ^8
 return
