@@ -4,6 +4,13 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #SingleInstance Force
 
+;TODO
+	;GSM-module type detection Quectel/Long Sung/Huawei
+	;"Potentional Security Breach" error
+	;1990 detection
+	;BLOCKS OF EXECUTION
+	;GUI
+
 CaptureData := []
 
 PuttySend(WatchText, Command)
@@ -94,11 +101,11 @@ CaptureArf()
 	return Arf
 }
 
-^1:: ; todo
+^1::
 	WinWait, PuTTY Fatal Error, ,3
 		Send, {Enter}
- 
-	Send, !{Space}
+
+	Send, {Alt down}{Space}{Alt up}
 	Send, r
 	
 	WinWait, PuTTY Security Alert, ,3
@@ -117,7 +124,7 @@ return
 	PuttySend("~#", "uci commit")
 	PuttySend("~#", "/etc/init.d/network reload")
 
-	WANPing:
+	Label_WANPing:
 	PuttySend("~#", "ifdown wan2")
 	PuttySend("~#", "ping 8.8.8.8 -c 3")
 	PuttySend("~#", " ")
@@ -144,16 +151,16 @@ return
 			IfMsgBox Cancel
 				return
 			else IfMsgBox TryAgain
-				Goto, WANPing
+				Goto, Label_WANPing
 			else 
 				Send, {Enter}
 	}
 
-	PuttySend("~#", "wget --no-check-certificate -P /tmp http://4duker.ru/1.bmp")
+;	PuttySend("~#", "wget --no-check-certificate -P /tmp http://4duker.ru/1.bmp")
 
 	PuttySend("~#", "ifup wan2")
 	PuttySend("~#", "ifdown wan")
-	SIM:
+	Label_SIM:
 	PuttySend("~#", "gcom -d /dev/ttyUSB2")
 	PuttySend("~#", " ")
 
@@ -176,7 +183,7 @@ return
 			IfMsgBox Cancel
 				return
 			else IfMsgBox TryAgain
-				Goto, SIM
+				Goto, Label_SIM
 			else 
 				Send, {Enter}
 	}
@@ -189,7 +196,7 @@ return
 		BlockInput Off
 	}
 
-	GSMping:
+	Label_GSMping:
 	PuttySend("~#", "ping 8.8.8.8 -c 10")
 	PuttySend("~#", " ")
 
@@ -197,6 +204,7 @@ return
 	CheckCut := CaptureArf()
 	WANPingRef := 600
 	WANPingRefMin := 30
+	CheckRead := 0
 	if (CheckCut > WANPingRef)
 	{
 		Message := "Warning! `nAverage ping is over " WANPingRef "ms."
@@ -204,11 +212,10 @@ return
 	}
 	if (CheckCut < WANPingRefMin) 
 	{
-		Message := "Warning! `nAverage ping is less then " WANPingRefMin "ms.`nCheck if WAN is enable"
+		Message := "Warning! `nAverage ping is less then " WANPingRefMin "ms.`nCheck if WAN is disable"
 		CheckRead := 1
 	}
 
-	CheckRead := 0
 	if ((PuttyRead("Network is unreachable") = 1) or (PuttyRead("Operation not permitted") = 1))
 	{
 		Message := "Warning! `nNetwork error"
@@ -221,7 +228,7 @@ return
 			IfMsgBox Cancel
 				return
 			else IfMsgBox TryAgain
-				Goto, GSMPing
+				Goto, Label_GSMPing
 			else 
 				Send, {Enter}
 	}
