@@ -5,10 +5,10 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #SingleInstance Force
 
 ;TODO
-	;GSM-module type detection Quectel/Long Sung/Huawei
 	;"Potentional Security Breach" error
+	;Maybe upgrade Cut on PuttyRead and PuttyCut - set COUNT-var: for CNT ping and number of lines for copy
+	;GSM-module type detection Quectel/Long Sung/Huawei
 	;1990 detection
-	;BLOCKS OF EXECUTION
 	;GUI
 
 CaptureData := []
@@ -28,16 +28,18 @@ PuttySend(WatchText, Command)
 				PuttyText := A_LoopField
 		}
 		PuttyText := SubStr(PuttyText, -(StrLen(WatchText)-1)) ; cut end of the line and check to match with WatchText
-		if (PuttyText != WatchText)	; need because AHK executing too fast and picking up whole context of previous line
-			Continue				; also proper response to random lag (in theory)
+		if (PuttyText = WatchText) or GetKeyState("Enter")	; need because AHK executing too fast and picking up whole context of previous line
+			Break											; also proper response to random lag (in theory)
 		Else
-			Break
+			Continue
 	}
 	if (PuttyText = WatchText)
 	{
 		Send, %Command%
 		Send, {Enter}
 	}
+	else
+		Send, {Enter}
 	ClipBoard := ""
 }
 
@@ -102,22 +104,35 @@ CaptureArf()
 }
 
 ^1::
+	Send, {Enter}
+	#IfWinActive ahk_class PuTTY Fatal Error
 	WinWait, PuTTY Fatal Error, ,3
 		Send, {Enter}
+	#IfWinActive
 
 	Send, {Alt down}{Space}{Alt up}
 	Send, r
-	
-	WinWait, PuTTY Security Alert, ,3
-		Send, {Left} {Enter} 
+;return
+;^q::
+	#IfWinActive ahk_class PuTTY Security Alert
+	Loop
+	{
+		WinWait, PuTTY Security Alert, ,3
+		if ErrorLevel = 0
+			Break
+		else
+			Continue
+	}
+	Send, {Left} {Enter} 
+	#IfWinActive
 return
 
-^2::
+^2:: ; login
 	PuttySend("as:", "root")
 	PuttySend("password:", "tmsoft")
 return
 
-^3::
+^3:: ; setup
 	Send, {Enter}
 	PuttySend("~#", "uci set network.wan2.device='/dev/ttyUSB3'")
 	PuttySend("~#", "uci delete network.lan.gateway")
@@ -125,13 +140,17 @@ return
 	PuttySend("~#", "/etc/init.d/network reload")
 return
 
-^4::
-	Label_WANPing:
+^4:: ; WAN check
+	Label_WANPing: ; yes it's label for scary horrible GOTO
+	PuttySend("~#", " ")
+	PuttySend("~#", " ")
+	PuttySend("~#", " ")
+	PuttySend("~#", " ")
 	PuttySend("~#", "ifdown wan2")
 	PuttySend("~#", "ping 8.8.8.8 -c 3")
 	PuttySend("~#", " ")
 	
-	CheckRead := 0
+	CheckRead := 0 ; trigger for showing error message
 	if ((PuttyRead("Network is unreachable") = 1) or (PuttyRead("Operation not permitted") = 1))
 	{
 		Message := "Warning! `nNetwork error"
@@ -151,19 +170,19 @@ return
 	{
 		MsgBox, 0x000136,, % Message
 			IfMsgBox Cancel
-				return
+				Exit
 			else IfMsgBox TryAgain
-				Goto, Label_WANPing
+				Goto, Label_WANPing ; yes it's scary horrible GOTO
 			else 
 				Send, {Enter}
 	}
 return
 
-^5::
+^5:: ; WAN check
 	PuttySend("~#", "wget --no-check-certificate -P /tmp http://4duker.ru/1.bmp")
 return
 
-^6::
+^6:: ; SIM check
 	PuttySend("~#", "ifup wan2")
 	PuttySend("~#", "ifdown wan")
 	Label_SIM:
@@ -187,7 +206,7 @@ return
 	{
 		MsgBox, 0x000136,, % Message
 			IfMsgBox Cancel
-				return
+				Exit
 			else IfMsgBox TryAgain
 				Goto, Label_SIM
 			else 
@@ -195,7 +214,7 @@ return
 	}
 return
 
-^7::
+^7:: ; GSM check
 	PingDelay := 10
 	BlockInput On
 	MsgBox, 0x000040,,% PingDelay "sec delay. `nInput blocked. `nStand by...", % PingDelay
@@ -205,6 +224,7 @@ return
 	}
 
 	Label_GSMping:
+	PuttySend("~#", "ifdown wan")
 	PuttySend("~#", "ping 8.8.8.8 -c 10")
 	PuttySend("~#", " ")
 
@@ -234,7 +254,7 @@ return
 	{
 		MsgBox, 0x000136,, % Message
 			IfMsgBox Cancel
-				return
+				Exit
 			else IfMsgBox TryAgain
 				Goto, Label_GSMPing
 			else 
@@ -242,7 +262,7 @@ return
 	}
 return
 
-^8::
+^8:: ; final setup, ModBus/MKADD/MTRDD check - val=1990
 	PuttySend("~#", "ifup wan")
 	PuttySend("~#", "ifup wan2")
 	PuttySend("~#", "uci set mspd48.socket.port='9001'")
@@ -265,3 +285,5 @@ return
 	Gosub ^7
 	Gosub ^8
 return
+
+Esc::ExitApp
