@@ -7,8 +7,12 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;TODO
 	;"Potentional Security Breach" error
 	;Maybe upgrade Cut on PuttyRead and PuttyCut - set COUNT-var: for CNT ping and number of lines for copy
+		;count for number of symbols in a row, send this to SubSrt, also count `n
+
+		;or start from special symbol 
+
+		;OR clear window and MAYBE logging
 	;GSM-module type detection Quectel/Long Sung/Huawei
-	;1990 detection
 	;GUI
 
 CaptureData := []
@@ -51,7 +55,7 @@ PuttyCut(BeginText, EndText)
 	ClipBoard := ""
 	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
 	ClipWait
-	Cut := SubStr(Clipboard, -650) ; taking not the whole window, otherwise need to clear the window
+	Cut := SubStr(Clipboard, -650) ; not taking the whole window, otherwise need to clear the window
 	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
 	{
 		if A_LoopField
@@ -103,7 +107,12 @@ CaptureArf()
 	return Arf
 }
 
+SetTitleMatchMode, 2
+
+Esc::Exit
+
 ^1::
+	WinActivate, PuTTY
 	Send, {Enter}
 	#IfWinActive ahk_class PuTTY Fatal Error
 	WinWait, PuTTY Fatal Error, ,3
@@ -112,13 +121,12 @@ CaptureArf()
 
 	Send, {Alt down}{Space}{Alt up}
 	Send, r
-;return
-;^q::
+
 	#IfWinActive ahk_class PuTTY Security Alert
 	Loop
 	{
 		WinWait, PuTTY Security Alert, ,3
-		if ErrorLevel = 0
+		if (ErrorLevel = 0) or (GetKeyState("Esc"))
 			Break
 		else
 			Continue
@@ -128,11 +136,13 @@ CaptureArf()
 return
 
 ^2:: ; login
+	WinActivate, PuTTY
 	PuttySend("as:", "root")
 	PuttySend("password:", "tmsoft")
 return
 
 ^3:: ; setup
+	WinActivate, PuTTY
 	Send, {Enter}
 	PuttySend("~#", "uci set network.wan2.device='/dev/ttyUSB3'")
 	PuttySend("~#", "uci delete network.lan.gateway")
@@ -141,11 +151,12 @@ return
 return
 
 ^4:: ; WAN check
+	WinActivate, PuTTY
 	Label_WANPing: ; yes it's label for scary horrible GOTO
-	PuttySend("~#", " ")
-	PuttySend("~#", " ")
-	PuttySend("~#", " ")
-	PuttySend("~#", " ")
+	PuttySend("~#", "                   ")
+	PuttySend("~#", "                   ")
+	PuttySend("~#", "                   ")
+	PuttySend("~#", "                   ")
 	PuttySend("~#", "ifdown wan2")
 	PuttySend("~#", "ping 8.8.8.8 -c 3")
 	PuttySend("~#", " ")
@@ -178,11 +189,13 @@ return
 	}
 return
 
-^5:: ; WAN check
+^5:: ; WAN check file download
+	WinActivate, PuTTY
 	PuttySend("~#", "wget --no-check-certificate -P /tmp http://4duker.ru/1.bmp")
 return
 
 ^6:: ; SIM check
+	WinActivate, PuTTY
 	PuttySend("~#", "ifup wan2")
 	PuttySend("~#", "ifdown wan")
 	Label_SIM:
@@ -196,7 +209,7 @@ return
 		CheckRead := 1
 	}
 
-	if (PuttyRead("Can't open device /dev/ttyUSB2") = 1)
+	if (PuttyRead("Can't open device /dev/ttyUSB") = 1)
 	{
 		Message := "Warning! `nGSM module error"
 		CheckRead := 1
@@ -215,6 +228,7 @@ return
 return
 
 ^7:: ; GSM check
+	WinActivate, PuTTY
 	PingDelay := 10
 	BlockInput On
 	MsgBox, 0x000040,,% PingDelay "sec delay. `nInput blocked. `nStand by...", % PingDelay
@@ -231,7 +245,7 @@ return
 	PuttyCut("time="," ms")
 	CheckCut := CaptureArf()
 	WANPingRef := 600
-	WANPingRefMin := 30
+	WANPingRefMin := 45
 	CheckRead := 0
 	if (CheckCut > WANPingRef)
 	{
@@ -263,17 +277,33 @@ return
 return
 
 ^8:: ; final setup, ModBus/MKADD/MTRDD check - val=1990
+	WinActivate, PuTTY
 	PuttySend("~#", "ifup wan")
 	PuttySend("~#", "ifup wan2")
 	PuttySend("~#", "uci set mspd48.socket.port='9001'")
 	PuttySend("~#", "uci set mspd48.socket.recvtimeout='1000'")
 	PuttySend("~#", "uci set mspd48.socket.address='megafon.techmonitor.ru'")
 	PuttySend("~#", "uci set mspd48.@module[0].enable='1'")
-	PuttySend("~#", "uci commit")
+	PuttySend("~#", "uci  commit")
 	PuttySend("~#", "/etc/init.d/mspd48 restart")
-
 	ClipBoard := ""
-	
+
+	loop
+	if (PuttyRead("1990") = 1)
+	{
+		MsgBox, 0x000040,,% "Modbus active `nDevice is ready"
+			IfMsgBox Ok
+				{
+					WinActivate, Form1
+					Sleep, 100
+					Send, {Tab}
+					Sleep, 100
+					Send, {Tab}
+				}
+		break
+	}
+	ClipBoard := ""
+
 return
 
 ^0::
@@ -285,5 +315,3 @@ return
 	Gosub ^7
 	Gosub ^8
 return
-
-Esc::ExitApp
