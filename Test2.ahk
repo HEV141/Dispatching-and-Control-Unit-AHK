@@ -125,17 +125,18 @@ ExitApp
 	Send, {Alt down}{Space}{Alt up}
 	Send, r
 
-	#IfWinActive ahk_class PuTTY Security Alert
-	Loop
-	{
-		WinWait, PuTTY Security Alert, ,3
-		if (ErrorLevel = 0) or (GetKeyState("Esc"))
-			Break
-		else
-			Continue
-	}
-	Send, {Left} {Enter} 
+	Send, {Alt down}{Tab}{Alt up}
+
+	Sleep, 100
+	Send, {Enter}
+	#IfWinActive ahk_class PuTTY Fatal Error
+	WinWait, PuTTY Fatal Error, ,3
+		Send, {Enter}
 	#IfWinActive
+
+	Send, {Alt down}{Space}{Alt up}
+	Send, r
+
 return
 
 ^2:: ; login
@@ -144,69 +145,68 @@ return
 	PuttySend("password:", "tmsoft")
 return
 
-^3:: ; setup
+^3::
 	WinActivate, PuTTY
-	Send, {Enter}
-	PuttySend("~#", "uci set network.wan2.device='/dev/ttyUSB3'")
-	PuttySend("~#", "uci delete network.lan.gateway")
-	PuttySend("~#", "uci commit")
-	PuttySend("~#", "/etc/init.d/network reload")
+	PuttySend("~#", "echo 80 > /sys/class/gpio/export")
+	PuttySend("~#", "echo in > /sys/class/gpio/gpio80/direction")
+	PuttySend("~#", "echo 120 > /sys/class/gpio/export")
+	PuttySend("~#", "echo in > /sys/class/gpio/gpio120/direction")
+	PuttySend("~#", "echo 121 > /sys/class/gpio/export")
+	PuttySend("~#", "echo in > /sys/class/gpio/gpio121/direction")
+
 return
 
-^4:: ; WAN check
-	WinActivate, PuTTY
-	Label_WANPing: ; yes it's label for scary horrible GOTO
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "ifdown wan2")
-	PuttySend("~#", "ping 8.8.8.8 -c 3")
+^4::
+	PuttySend("~#", "cat /sys/kernel/debug/gpio")
+
+return
+
+^5::
+	PuttySend("~#", "df -h")
+	if (PuttyRead("1.9G") != 1)
+	{
+		Message := "Warning! `nSD-card error"
+		CheckRead := 1
+	}	
+
+return
+
+^6::
+	Sleep, 100
+	Send, {Alt down}{Tab}{Alt up}
+	PuttySend("~#", "cat /dev/ttyAPP2")
+	Sleep, 100
+	Send, {Alt down}{Tab}{Alt up}
+	PuttySend("~#", " ") 
+	Send, echo "AT" > /dev/ttyAPP3 {Enter}
+	PuttySend("~#", " ") 
+	Send, echo "AT" > /dev/ttyAPP3 {Enter}
+	PuttySend("~#", " ") 
+	Send, echo "AT" > /dev/ttyAPP3 {Enter}
+	Sleep, 100
+	Send, {Alt down}{Tab}{Alt up}
+	Send, {Ctrl down} C {Ctrl up}
+	PuttySend("~#", "cat /dev/ttyAPP3")
+	Sleep, 100
+	Send, {Alt down}{Tab}{Alt up}
+	PuttySend("~#", " ") 
+	Send, echo "AT" > /dev/ttyAPP2 {Enter}
+	PuttySend("~#", " ") 
+	Send, echo "AT" > /dev/ttyAPP2 {Enter}
 	PuttySend("~#", " ")
-	
-	CheckRead := 0 ; trigger for showing error message
-	if ((PuttyRead("Network is unreachable") = 1) or (PuttyRead("Operation not permitted") = 1))
-	{
-		Message := "Warning! `nNetwork error"
-		CheckRead := 1
-	}
-
-	PuttyCut("time="," ms")
-	CheckCut := CaptureArf()
-	WANPingRef := 25
-	if (CheckCut > WANPingRef)
-	{
-		Message := "Warning! `nAverage ping is over " WANPingRef "ms."
-		CheckRead := 1
-	}
-
-	if (CheckRead = 1)
-	{
-		MsgBox, 0x000136,, % Message
-			IfMsgBox Cancel
-				Exit
-			else IfMsgBox TryAgain
-				Goto, Label_WANPing ; yes it's scary horrible GOTO
-			else 
-				Send, {Enter}
-	}
+	Send, echo "AT" > /dev/ttyAPP2 {Enter}
+	Sleep, 100
+	Send, {Alt down}{Tab}{Alt up}
+	Send, {Ctrl down} C {Ctrl up}
+	Sleep, 100
+	Send, {Alt down}{Tab}{Alt up}
 return
 
-^5:: ; WAN check file download
-	WinActivate, PuTTY
-	PuttySend("~#", "wget --no-check-certificate -P /tmp http://4duker.ru/1.bmp")
-return
 
-^6:: ; SIM check
+^7:: ; SIM check
 	WinActivate, PuTTY
-	PuttySend("~#", "ifup wan2")
-	PuttySend("~#", "ifdown wan")
 	Label_SIM:
-	PuttySend("~#", "gcom -d /dev/ttyUSB2")
+	PuttySend("~#", "gcom -d /dev/ttyAPP0")
 	PuttySend("~#", " ")
 
 	CheckRead := 0
@@ -234,7 +234,7 @@ return
 	}
 return
 
-^7:: ; GSM check
+^8:: ; GSM check
 	WinActivate, PuTTY
 	PingDelay := 10
 	BlockInput On
@@ -283,42 +283,16 @@ return
 	}
 return
 
-^8:: ; final setup, ModBus/MKADD/MTRDD check - val=1990
-	WinActivate, PuTTY
-	PuttySend("~#", "ifup wan")
-	PuttySend("~#", "ifup wan2")
-	PuttySend("~#", "uci set mspd48.socket.port='9001'")
-	PuttySend("~#", "uci set mspd48.socket.recvtimeout='1000'")
-	PuttySend("~#", "uci set mspd48.socket.address='megafon.techmonitor.ru'")
-	PuttySend("~#", "uci set mspd48.@module[0].enable='1'")
-	PuttySend("~#", "uci  commit")
-	PuttySend("~#", "/etc/init.d/mspd48 restart")
-	ClipBoard := ""
-
-	loop
-	if (PuttyRead("1990") = 1)
-	{
-		MsgBox, 0x000040,,% "Modbus active `nDevice is ready"
-			IfMsgBox Ok
-				{
-					WinActivate, Form1
-					Sleep, 100
-					Send, {Tab}
-					Sleep, 100
-					Send, {Tab}
-				}
-		break
-	}
-	ClipBoard := ""
-
-return
-
 ^0::
-	Gosub ^2
-	Gosub ^3
-	Gosub ^4
-	Gosub ^5
-	Gosub ^6
-	Gosub ^7
-	Gosub ^8
+	Send, {Alt down}{Tab}{Alt up}
 return
+
+; ^0::
+; 	Gosub ^2
+; 	Gosub ^3
+; 	Gosub ^4
+; 	Gosub ^5
+; 	Gosub ^6
+; 	Gosub ^7
+; 	Gosub ^8
+; return
