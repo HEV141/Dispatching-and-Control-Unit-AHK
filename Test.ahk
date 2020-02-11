@@ -5,13 +5,14 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #SingleInstance Force
 
 ;TODO
-	;"Potentional Security Breach" error
 	;Maybe upgrade Cut on PuttyRead and PuttyCut - set COUNT-var: for CNT ping and number of lines for copy
-		;count for number of symbols in a row, send this to SubSrt, also count `n
-
+		;count for number of symbols in a row, send this to SubSrt, count `n
+		
 		;or start from special symbol 
 
 		;OR clear window and MAYBE logging
+
+		;!!!make index array: index - number of `n, value - number of chars 
 	;GSM-module type detection Quectel/Long Sung/Huawei
 	;GUI
 
