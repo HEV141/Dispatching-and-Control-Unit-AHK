@@ -12,7 +12,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 		;OR clear window and MAYBE logging
 
-		;!!!make index array: index - number of `n, value - number of chars 
+		;!make index array: index - number of `n, value - number of chars 
 	;GSM-module type detection Quectel/Long Sung/Huawei
 	;GUI
 
@@ -33,10 +33,10 @@ PuttySend(WatchText, Command)
 				PuttyText := A_LoopField
 		}
 		PuttyText := SubStr(PuttyText, -(StrLen(WatchText)-1)) ; cut end of the line and check to match with WatchText
-		if (PuttyText = WatchText) or GetKeyState("Enter")	; need because AHK executing too fast and picking up whole context of previous line
-			Break											; also proper response to random lag (in theory)
-		Else
-			Continue
+		if (PuttyText = WatchText) or (GetKeyState("Esc"))	; need because AHK executing too fast and picking up whole context of previous line
+			break											; also proper response to random lag (in theory)
+		else
+			continue
 	}
 	if (PuttyText = WatchText)
 	{
@@ -112,7 +112,8 @@ SetTitleMatchMode, 2
 
 Esc::
 	MsgBox, Script is stopped
-ExitApp
+	exit
+return
 
 ^1::
 	WinActivate, PuTTY
@@ -131,9 +132,9 @@ ExitApp
 	{
 		WinWait, PuTTY Security Alert, ,3
 		if (ErrorLevel = 0) or (GetKeyState("Esc"))
-			Break
+			break
 		else
-			Continue
+			continue
 	}
 	Send, {Left} {Enter} 
 	#IfWinActive
@@ -297,18 +298,22 @@ return
 	ClipBoard := ""
 
 	loop
-	if (PuttyRead("1990") = 1)
 	{
-		MsgBox, 0x000040,,% "Modbus active `nDevice is ready"
-			IfMsgBox Ok
-				{
-					WinActivate, Form1
-					Sleep, 100
-					Send, {Tab}
-					Sleep, 100
-					Send, {Tab}
-				}
-		break
+		if (PuttyRead("1990") = 1)
+		{
+			MsgBox, 0x000040,,% "Modbus active `nDevice is ready"
+				IfMsgBox Ok
+					{
+						WinActivate, Form1
+						Sleep, 100
+						Send, {Tab}
+						Sleep, 100
+						Send, {Tab}
+					}
+			break
+		}
+		if (GetKeyState("Esc"))
+			break
 	}
 	ClipBoard := ""
 
