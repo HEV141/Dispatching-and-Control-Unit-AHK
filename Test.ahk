@@ -13,7 +13,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 		;OR clear window and MAYBE logging
 
 		;!make index array: index - number of `n, value - number of chars 
-	;GSM-module type detection Quectel/Long Sung/Huawei
+	;GSM-module type detection Quectel/LongSung/Huawei
 	;GUI
 
 CaptureData := []
@@ -110,6 +110,11 @@ CaptureArf()
 
 SetTitleMatchMode, 2
 
+F12::
+	MsgBox, Script is killed
+	ExitApp
+return
+
 Esc::
 	MsgBox, Script is stopped
 	exit
@@ -149,7 +154,13 @@ return
 ^3:: ; setup
 	WinActivate, PuTTY
 	Send, {Enter}
-	PuttySend("~#", "uci set network.wan2.device='/dev/ttyUSB3'")
+	switch Modem
+	{
+		case "Quectel": PuttySend("~#", "uci set network.wan2.device='/dev/ttyUSB3'")
+		case "LongSung": PuttySend("~#", "uci set network.wan2.device='/dev/ttyUSB2'")
+		case "Huawei": PuttySend("~#", "uci set network.wan2.device='/dev/ttyUSB0'")
+		Default: PuttySend("~#", "uci set network.wan2.device='/dev/ttyUSB3'")
+	}
 	PuttySend("~#", "uci delete network.lan.gateway")
 	PuttySend("~#", "uci commit")
 	PuttySend("~#", "/etc/init.d/network reload")
@@ -208,7 +219,13 @@ return
 	PuttySend("~#", "ifup wan2")
 	PuttySend("~#", "ifdown wan")
 	Label_SIM:
-	PuttySend("~#", "gcom -d /dev/ttyUSB2")
+	switch Modem
+	{
+		case "Quectel": PuttySend("~#", "gcom -d /dev/ttyUSB2")
+		case "LongSung": PuttySend("~#", "gcom -d /dev/ttyUSB1")
+		case "Huawei": PuttySend("~#", "gcom")
+		Default: PuttySend("~#", "gcom -d /dev/ttyUSB2")
+	}
 	PuttySend("~#", " ")
 
 	CheckRead := 0

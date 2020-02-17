@@ -14,9 +14,9 @@ Gui, New,, Test GUI
 Gui, Add, Text,, Проверка
 
 Gui, Add, GroupBox, r3, Модем:
-Gui, Add, Radio, vQuectel Group Checked xp+10 yp+20 r1, Quectel
-Gui, Add, Radio, vLongSung r1, Long Sung
-Gui, Add, Radio, vHuawei r1, Huawei
+Gui, Add, Radio, gRadioCheck vRadioGr Group Checked xp+10 yp+20 r1, Quectel
+Gui, Add, Radio, gRadioCheck r1, Long Sung
+Gui, Add, Radio, gRadioCheck r1, Huawei
 
 Gui, Add, Button, x50 y110 w60 gStart, Старт
 Gui, Add, Button, x50 y140 w60 gExit, Стоп
@@ -42,10 +42,21 @@ Gui, Add, CheckBox, vCheck6 Checked, Проверка SIM
 Gui, Add, CheckBox, vCheck7 Checked, Проверка GSM
 Gui, Add, CheckBox, vCheck8 Checked, Финальная настройка и проверка ModBus
 
-Gui, Show, x100 y4 w440 h500
+Gui, Show, x800 y4 w440 h500
 
 Toggle := 1
 #Include Test.ahk
+return
+
+RadioCheck:
+    Gui, Submit, NoHide
+    ;GuiControlGet, RadioGr
+    if (RadioGr = 1)
+        Modem := "Quectel"
+    if (RadioGr = 2)
+        Modem := "LongSung"
+    if (RadioGr = 3)
+        Modem := "Huawei"
 return
 
 Start:

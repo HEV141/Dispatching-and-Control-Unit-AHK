@@ -107,11 +107,25 @@ CaptureArf()
 	return Arf
 }
 
+AltTab()
+{
+	Sleep, 100
+	Send, {Alt down}{Tab}
+	Sleep, 1
+	Send, {Alt up}
+}
+
 SetTitleMatchMode, 2
+
+F12::
+	MsgBox, Script is killed
+	ExitApp
+return
 
 Esc::
 	MsgBox, Script is stopped
-ExitApp
+	exit
+return
 
 ^1::
 	WinActivate, PuTTY
@@ -125,7 +139,7 @@ ExitApp
 	Send, {Alt down}{Space}{Alt up}
 	Send, r
 
-	Send, {Alt down}{Tab}{Alt up}
+	AltTab()
 
 	Sleep, 100
 	Send, {Enter}
@@ -143,6 +157,11 @@ return
 	WinActivate, PuTTY
 	PuttySend("as:", "root")
 	PuttySend("password:", "tmsoft")
+
+	AltTab()
+
+	PuttySend("as:", "root")
+	PuttySend("password:", "tmsoft")	
 return
 
 ^3::
@@ -172,34 +191,36 @@ return
 return
 
 ^6::
-	Sleep, 100
-	Send, {Alt down}{Tab}{Alt up}
+
+	AltTab()
 	PuttySend("~#", "cat /dev/ttyAPP2")
-	Sleep, 100
-	Send, {Alt down}{Tab}{Alt up}
+
+	AltTab()
 	PuttySend("~#", " ") 
 	Send, echo "AT" > /dev/ttyAPP3 {Enter}
 	PuttySend("~#", " ") 
 	Send, echo "AT" > /dev/ttyAPP3 {Enter}
 	PuttySend("~#", " ") 
 	Send, echo "AT" > /dev/ttyAPP3 {Enter}
-	Sleep, 100
-	Send, {Alt down}{Tab}{Alt up}
-	Send, {Ctrl down} C {Ctrl up}
+
+	AltTab()
+	Send, {Ctrl down}c{Ctrl up}
 	PuttySend("~#", "cat /dev/ttyAPP3")
-	Sleep, 100
-	Send, {Alt down}{Tab}{Alt up}
+
+	AltTab()
+	PuttySend("~#", " ") 
+	PuttySend("~#", " ") 
 	PuttySend("~#", " ") 
 	Send, echo "AT" > /dev/ttyAPP2 {Enter}
 	PuttySend("~#", " ") 
 	Send, echo "AT" > /dev/ttyAPP2 {Enter}
 	PuttySend("~#", " ")
 	Send, echo "AT" > /dev/ttyAPP2 {Enter}
-	Sleep, 100
-	Send, {Alt down}{Tab}{Alt up}
-	Send, {Ctrl down} C {Ctrl up}
-	Sleep, 100
-	Send, {Alt down}{Tab}{Alt up}
+
+	AltTab()
+	Send, {Ctrl down}c{Ctrl up}
+
+	AltTab()
 return
 
 
@@ -281,10 +302,6 @@ return
 			else 
 				Send, {Enter}
 	}
-return
-
-^0::
-	Send, {Alt down}{Tab}{Alt up}
 return
 
 ; ^0::
