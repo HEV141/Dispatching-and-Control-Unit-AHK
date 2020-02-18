@@ -117,7 +117,7 @@ return
 
 Esc::
 	MsgBox, Script is stopped
-	exit
+	Exit
 return
 
 ^1::

@@ -4,6 +4,8 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #SingleInstance Force
 
+;Ctrl+K+C
+;Ctrl+K+U
 
 ;TODO
     ;blocking input - maybe good idea
@@ -50,7 +52,6 @@ return
 
 RadioCheck:
     Gui, Submit, NoHide
-    ;GuiControlGet, RadioGr
     if (RadioGr = 1)
         Modem := "Quectel"
     if (RadioGr = 2)
@@ -60,14 +61,7 @@ RadioCheck:
 return
 
 Start:
-    GuiControlGet, Check1
-    GuiControlGet, Check2
-    GuiControlGet, Check3
-    GuiControlGet, Check4
-    GuiControlGet, Check5
-    GuiControlGet, Check6
-    GuiControlGet, Check7
-    GuiControlGet, Check8
+    Gui, Submit, NoHide
     if (Check1)
         Gosub ^1
     if (Check2)
@@ -87,7 +81,10 @@ Start:
 return
 
 Exit:
-Exit
+    Critical, On
+    Exit
+    Send, {Esc}
+    Reload
 return
 
 ToggleAll:
