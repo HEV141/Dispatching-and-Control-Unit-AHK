@@ -17,6 +17,20 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 CaptureData := []
 
+PuttyLaunch(Title)
+{
+	BlockInput On
+	run putty.exe
+	Sleep, 100
+	Send, !g ; !=Alt
+	Send, {Down}{Down}{Down}{Down}{Down}{Down}{Down}{Down}
+	Send, {Tab} %Title%
+	Send, !y  ; !=Alt
+	Sleep, 100
+	Send, {Enter}
+	BlockInput Off
+}
+
 PuttySend(WatchText, Command)
 {
 	Loop
@@ -108,7 +122,8 @@ CaptureArf()
 }
 
 AltTab()
-{
+{	
+	SetKeyDelay 30, 50
 	Sleep, 100
 	Send, {Alt down}{Tab}
 	Sleep, 1
@@ -120,6 +135,16 @@ SetTitleMatchMode, 2
 F12::
 	MsgBox, Script is killed
 	ExitApp
+return
+
+;run putty through AHK command with AUX title
+;resize and allign
+;use WinActivate, AUX
+	;WinWait, PuTTY, ,
+	;WinMove, PuTTY, , 0, 0
+
+ScrollLock::
+	PuttyLaunch("AUX")
 return
 
 Esc::

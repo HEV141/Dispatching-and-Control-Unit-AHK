@@ -2,6 +2,7 @@
 ; #Warn  ; warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+#NoTrayIcon
 #SingleInstance Force
 
 ;Ctrl+K+C
@@ -12,7 +13,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
     ;GSM signal quality
     ;calling subroutine that calling other subroutine seems doesn't work 
 
-Gui, New,, Test GUI
+Gui, New,, Dispatching and Control Unit | Quality Control
 Gui, Add, Text,, Проверка
 
 Gui, Add, GroupBox, r3, Модем:
@@ -20,8 +21,9 @@ Gui, Add, Radio, gRadioCheck vRadioGr Group Checked xp+10 yp+20 r1, Quectel
 Gui, Add, Radio, gRadioCheck r1, Long Sung
 Gui, Add, Radio, gRadioCheck r1, Huawei
 
-Gui, Add, Button, x50 y110 w60 gStart, Старт
-Gui, Add, Button, x50 y140 w60 gExit, Стоп
+Gui, Add, Button, x80 y110 w60 gStart, Start
+Gui, Add, Button, x20 y110 w50 h53 gReboot, Reboot
+Gui, Add, Button, x80 y140 w60 gStop, Stop
 Gui, Add, Text, x10 y175, Статус
 Gui, Add, Edit, w380 r5
 
@@ -37,7 +39,7 @@ Gui, Add, Button, g^7 w25 h13, >>
 Gui, Add, Button, g^8 w25 h13, >>
 Gui, Add, CheckBox, x190 y35 vCheck1 Checked, Перезапуск
 Gui, Add, CheckBox, vCheck2 Checked, Логин
-Gui, Add, CheckBox, vCheck3 Checked, Настройка
+Gui, Add, CheckBox, vCheck3 Checked, Первоначальная настройка
 Gui, Add, CheckBox, vCheck4 Checked, Проверка WAN
 Gui, Add, CheckBox, vCheck5 Checked, Проверка WAN, скачивание файла
 Gui, Add, CheckBox, vCheck6 Checked, Проверка SIM
@@ -80,9 +82,14 @@ Start:
         Gosub ^8
 return
 
-Exit:
+Stop:
     Critical, On
+    Send, {Esc}
     Exit
+return
+
+Reboot:
+    Critical, On
     Send, {Esc}
     Reload
 return

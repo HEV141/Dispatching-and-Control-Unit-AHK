@@ -318,6 +318,7 @@ return
 	{
 		if (PuttyRead("1990") = 1)
 		{
+			SoundBeep
 			MsgBox, 0x000040,,% "Modbus active `nDevice is ready"
 				IfMsgBox Ok
 					{
