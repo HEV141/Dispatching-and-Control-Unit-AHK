@@ -4,6 +4,7 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #SingleInstance Force
 
+
 ;TODO
 	;Maybe upgrade Cut on PuttyRead and PuttyCut - set COUNT-var: for CNT ping and number of lines for copy
 		;count for number of symbols in a row, send this to SubSrt, count `n
@@ -16,7 +17,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 	;GSM-module type detection Quectel/LongSung/Huawei
 	;GUI
 
-CaptureData := []
+global CaptureData := []
+global Title := "PuTTY"
 
 PuttySend(WatchText, Command)
 {
@@ -25,7 +27,7 @@ PuttySend(WatchText, Command)
 		Sleep, 100
 		SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 		ClipBoard := ""
-		PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
+		PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 		ClipWait
 		Loop, parse, Clipboard, `n, `r    ; gets the last line of text from the clipboard
 		{
@@ -54,7 +56,7 @@ PuttyCut(BeginText, EndText)
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 	ClipBoard := ""
-	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
+	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 	ClipWait
 	Cut := SubStr(Clipboard, -650) ; not taking the whole window, otherwise need to clear the window
 	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
@@ -80,7 +82,7 @@ PuttyRead(TextToFound)
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 	ClipBoard := ""
-	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
+	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 	ClipWait
 	Cut := SubStr(Clipboard, -650) ; taking not whole window, otherwise need to clear window
 	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
@@ -310,7 +312,7 @@ return
 	PuttySend("~#", "uci set mspd48.socket.recvtimeout='1000'")
 	PuttySend("~#", "uci set mspd48.socket.address='megafon.techmonitor.ru'")
 	PuttySend("~#", "uci set mspd48.@module[0].enable='1'")
-	PuttySend("~#", "uci  commit")
+	PuttySend("~#", "uci commit")
 	PuttySend("~#", "/etc/init.d/mspd48 restart")
 	ClipBoard := ""
 
@@ -322,6 +324,7 @@ return
 			MsgBox, 0x000040,,% "Modbus active `nDevice is ready"
 				IfMsgBox Ok
 					{
+						Sleep, 200
 						WinActivate, Form1
 						Sleep, 100
 						Send, {Tab}

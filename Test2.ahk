@@ -15,19 +15,25 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 	;GSM-module type detection Quectel/Long Sung/Huawei
 	;GUI
 
-CaptureData := []
+global CaptureData := []
+global Title := "PuTTY"
 
-PuttyLaunch(Title)
+PuttyLaunch(Title, X, Y, Width, Height)
 {
 	BlockInput On
+	
 	run putty.exe
-	Sleep, 100
+	Sleep, 200
 	Send, !g ; !=Alt
 	Send, {Down}{Down}{Down}{Down}{Down}{Down}{Down}{Down}
 	Send, {Tab} %Title%
 	Send, !y  ; !=Alt
 	Sleep, 100
 	Send, {Enter}
+	SetTitleMatchMode, 2
+	Sleep, 100
+	WinMove, %Title%, , %X%, %Y%, %Width%, %Height%
+
 	BlockInput Off
 }
 
@@ -38,7 +44,7 @@ PuttySend(WatchText, Command)
 		Sleep, 100
 		SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 		ClipBoard := ""
-		PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
+		PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 		ClipWait
 		Loop, parse, Clipboard, `n, `r    ; gets the last line of text from the clipboard
 		{
@@ -67,7 +73,7 @@ PuttyCut(BeginText, EndText)
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 	ClipBoard := ""
-	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
+	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 	ClipWait
 	Cut := SubStr(Clipboard, -650) ; not taking the whole window, otherwise need to clear the window
 	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
@@ -93,7 +99,7 @@ PuttyRead(TextToFound)
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 	ClipBoard := ""
-	PostMessage, 0x112, 0x170, 0,, PuTTY ; dark magic copy context of the window to the clipboard ; [title] = PuTTY - not working with global var
+	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 	ClipWait
 	Cut := SubStr(Clipboard, -650) ; taking not whole window, otherwise need to clear window
 	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
@@ -144,7 +150,8 @@ return
 	;WinMove, PuTTY, , 0, 0
 
 ScrollLock::
-	PuttyLaunch("AUX")
+	PuttyLaunch("AUX", 0, 0, 300, 675)
+	PuttyLaunch("PuTTY", 300, 0, 550, 675)
 return
 
 Esc::
@@ -164,8 +171,7 @@ return
 	Send, {Alt down}{Space}{Alt up}
 	Send, r
 
-	AltTab()
-
+	WinActivate, AUX
 	Sleep, 100
 	Send, {Enter}
 	#IfWinActive ahk_class PuTTY Fatal Error
@@ -183,8 +189,8 @@ return
 	PuttySend("as:", "root")
 	PuttySend("password:", "tmsoft")
 
-	AltTab()
-
+	WinActivate, AUX
+	global Title := "AUX"
 	PuttySend("as:", "root")
 	PuttySend("password:", "tmsoft")	
 return

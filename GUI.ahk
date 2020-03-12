@@ -86,11 +86,11 @@ Stop:
     Critical, On
     Send, {Esc}
     Exit
+    #Include Test.ahk
 return
 
 Reboot:
     Critical, On
-    Send, {Esc}
     Reload
 return
 
