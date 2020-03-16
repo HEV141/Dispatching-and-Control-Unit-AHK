@@ -85,7 +85,6 @@ return
 Stop:
     Critical, On
     Send, {Esc}
-    Exit
     #Include Test.ahk
 return
 

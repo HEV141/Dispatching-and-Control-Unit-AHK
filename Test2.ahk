@@ -39,6 +39,7 @@ PuttyLaunch(Title, X, Y, Width, Height)
 
 PuttySend(WatchText, Command)
 {
+	WinActivate, %Title%
 	Loop
 	{
 		Sleep, 100
@@ -69,6 +70,7 @@ PuttySend(WatchText, Command)
 
 PuttyCut(BeginText, EndText)
 {
+	WinActivate, %Title%
 	global CaptureData := []
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
@@ -95,6 +97,7 @@ PuttyCut(BeginText, EndText)
 
 PuttyRead(TextToFound)
 {
+	WinActivate, %Title%
 	global CaptureData := []
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
@@ -160,7 +163,6 @@ Esc::
 return
 
 ^1::
-	WinActivate, PuTTY
 	Sleep, 100
 	Send, {Enter}
 	#IfWinActive ahk_class PuTTY Fatal Error
@@ -171,6 +173,7 @@ return
 	Send, {Alt down}{Space}{Alt up}
 	Send, r
 
+	global Title := "AUX"
 	WinActivate, AUX
 	Sleep, 100
 	Send, {Enter}
@@ -185,18 +188,16 @@ return
 return
 
 ^2:: ; login
-	WinActivate, PuTTY
 	PuttySend("as:", "root")
 	PuttySend("password:", "tmsoft")
 
-	WinActivate, AUX
 	global Title := "AUX"
 	PuttySend("as:", "root")
 	PuttySend("password:", "tmsoft")	
 return
 
 ^3::
-	WinActivate, PuTTY
+	global Title := "PuTTY"
 	PuttySend("~#", "echo 80 > /sys/class/gpio/export")
 	PuttySend("~#", "echo in > /sys/class/gpio/gpio80/direction")
 	PuttySend("~#", "echo 120 > /sys/class/gpio/export")
@@ -222,11 +223,10 @@ return
 return
 
 ^6::
-
-	AltTab()
+	global Title := "AUX"
 	PuttySend("~#", "cat /dev/ttyAPP2")
 
-	AltTab()
+	global Title := "PuTTY"
 	PuttySend("~#", " ") 
 	Send, echo "AT" > /dev/ttyAPP3 {Enter}
 	PuttySend("~#", " ") 
@@ -234,11 +234,11 @@ return
 	PuttySend("~#", " ") 
 	Send, echo "AT" > /dev/ttyAPP3 {Enter}
 
-	AltTab()
+	global Title := "AUX"
 	Send, {Ctrl down}c{Ctrl up}
 	PuttySend("~#", "cat /dev/ttyAPP3")
 
-	AltTab()
+	global Title := "PuTTY"
 	PuttySend("~#", " ") 
 	PuttySend("~#", " ") 
 	PuttySend("~#", " ") 
@@ -248,10 +248,10 @@ return
 	PuttySend("~#", " ")
 	Send, echo "AT" > /dev/ttyAPP2 {Enter}
 
-	AltTab()
+	global Title := "AUX"
 	Send, {Ctrl down}c{Ctrl up}
 
-	AltTab()
+	global Title := "PuTTY"
 return
 
 

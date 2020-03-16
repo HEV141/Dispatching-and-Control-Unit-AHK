@@ -22,6 +22,7 @@ global Title := "PuTTY"
 
 PuttySend(WatchText, Command)
 {
+	WinActivate, %Title%
 	Loop
 	{
 		Sleep, 100
@@ -52,6 +53,7 @@ PuttySend(WatchText, Command)
 
 PuttyCut(BeginText, EndText)
 {
+	WinActivate, %Title%
 	global CaptureData := []
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
@@ -78,6 +80,7 @@ PuttyCut(BeginText, EndText)
 
 PuttyRead(TextToFound)
 {
+	WinActivate, %Title%
 	global CaptureData := []
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
