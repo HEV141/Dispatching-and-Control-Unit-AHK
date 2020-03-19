@@ -22,12 +22,12 @@ PuttyLaunch(Title, X, Y, Width, Height)
 {
 	BlockInput On
 	
-	run putty.exe
+	Run putty.exe
 	Sleep, 200
 	Send, !g ; !=Alt
 	Send, {Down}{Down}{Down}{Down}{Down}{Down}{Down}{Down}
 	Send, {Tab} %Title%
-	Send, !y  ; !=Alt
+	Send, !y ; !=Alt
 	Sleep, 100
 	Send, {Enter}
 	SetTitleMatchMode, 2

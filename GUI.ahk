@@ -37,6 +37,8 @@ Gui, Add, Button, g^5 w25 h13, >>
 Gui, Add, Button, g^6 w25 h13, >>
 Gui, Add, Button, g^7 w25 h13, >>
 Gui, Add, Button, g^8 w25 h13, >>
+Gui, Add, Button, x290 y6 gPingForm1Launch w70, Ping/Form
+Gui, Add, Button, x370 y6 gPuttyLaunch w60, PuTTY
 Gui, Add, CheckBox, x190 y35 vCheck1 Checked, Перезапуск
 Gui, Add, CheckBox, vCheck2 Checked, Логин
 Gui, Add, CheckBox, vCheck3 Checked, Первоначальная настройка
@@ -50,6 +52,21 @@ Gui, Show, x800 y4 w440 h500
 
 Toggle := 1
 #Include Test.ahk
+SetTitleMatchMode, 2
+return
+
+PuttyLaunch:
+    PuttyLaunch("PuTTY", 0, 0, 640, 675)
+return
+
+PingForm1Launch:
+    Run C:\Windows\System32\cmd.exe /k ping -t 192.168.1.122
+    Sleep, 200
+    WinMove, ping, , 0, 675, 400, 300
+
+    Run "C:\Users\TM_SycHEVanov\Desktop\ПРОВЕРКА АСДУ\ФИНАЛЬНАЯ ПРОВЕРКА АСДУ\SerialScanerNew\Emuliator.SerialScaner.exe"
+    Sleep, 200
+    WinMove, Form1, , 405, 675
 return
 
 RadioCheck:

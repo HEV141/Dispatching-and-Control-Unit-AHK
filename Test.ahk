@@ -20,6 +20,25 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 global CaptureData := []
 global Title := "PuTTY"
 
+PuttyLaunch(Title, X, Y, Width, Height)
+{
+	BlockInput On
+	
+	Run putty.exe
+	Sleep, 200
+	Send, !g ; !=Alt
+	Send, {Down}{Down}{Down}{Down}{Down}{Down}{Down}{Down}
+	Send, {Tab} %Title%
+	Send, !y ; !=Alt
+	Sleep, 100
+	Send, {Enter}
+	SetTitleMatchMode, 2
+	Sleep, 100
+	WinMove, %Title%, , %X%, %Y%, %Width%, %Height%
+
+	BlockInput Off
+}
+
 PuttySend(WatchText, Command)
 {
 	WinActivate, %Title%
@@ -123,6 +142,38 @@ return
 Esc::
 	MsgBox, Script is stopped
 	Exit
+return
+
+;запихать ошибки типа "Warning! `nNetwork error" в функцию через throw
+;или нет
+;подумать про кастомные сообщения ошибок
+;
+;
+
+ScrollLock::
+	try  ; Attempts to execute code.
+	{
+		test := 2
+		HelloWorld()
+		MakeToast(test)
+	}
+	catch e  ; Handles the first error/exception raised by the block above.
+	{
+		MsgBox, An exception was thrown!`nSpecifically: %e%
+		Exit
+	}
+
+	HelloWorld()  ; Always succeeds.
+	{
+		MsgBox, Hello, world!
+	}
+
+	MakeToast(test)  ; Always fails.
+	{
+		; Jump immediately to the try block's error handler:
+		if (test = 2)
+			throw A_ThisFunc " is not implemented, sorry"
+	}
 return
 
 ^1::
@@ -327,12 +378,10 @@ return
 			MsgBox, 0x000040,,% "Modbus active `nDevice is ready"
 				IfMsgBox Ok
 					{
-						Sleep, 200
+						BlockInput On
+						Sleep, 1000
 						WinActivate, Form1
-						Sleep, 100
-						Send, {Tab}
-						Sleep, 100
-						Send, {Tab}
+						BlockInput Off
 					}
 			break
 		}
