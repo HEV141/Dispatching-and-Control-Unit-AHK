@@ -4,17 +4,6 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #SingleInstance Force
 
-;TODO
-	;"Potentional Security Breach" error
-	;Maybe upgrade Cut on PuttyRead and PuttyCut - set COUNT-var: for CNT ping and number of lines for copy
-		;count for number of symbols in a row, send this to SubSrt, also count `n
-
-		;or start from special symbol 
-
-		;OR clear window and MAYBE logging
-	;GSM-module type detection Quectel/Long Sung/Huawei
-	;GUI
-
 global CaptureData := []
 global Title := "PuTTY"
 
@@ -113,6 +102,8 @@ PuttyRead(TextToFound)
 			;MsgBox, % PuttyText
 			if InStr(PuttyText, TextToFound)
   				return 1
+			else
+				return 0
 		}
 	}
 	ClipBoard := ""
@@ -130,15 +121,6 @@ CaptureArf()
 	return Arf
 }
 
-AltTab()
-{	
-	SetKeyDelay 30, 50
-	Sleep, 100
-	Send, {Alt down}{Tab}
-	Sleep, 1
-	Send, {Alt up}
-}
-
 SetTitleMatchMode, 2
 
 F12::
@@ -146,15 +128,9 @@ F12::
 	ExitApp
 return
 
-;run putty through AHK command with AUX title
-;resize and allign
-;use WinActivate, AUX
-	;WinWait, PuTTY, ,
-	;WinMove, PuTTY, , 0, 0
-
 ScrollLock::
-	PuttyLaunch("AUX", 0, 0, 300, 675)
-	PuttyLaunch("PuTTY", 300, 0, 550, 675)
+	PuttyLaunch("AUX", 0, 0, 300, 610)
+	PuttyLaunch("PuTTY", 300, 0, 550, 610)
 return
 
 Esc::
@@ -162,7 +138,9 @@ Esc::
 	exit
 return
 
-^1::
+Numpad0 & Numpad1::
+	global Title := "PuTTY"
+	WinActivate, PuTTY
 	Sleep, 100
 	Send, {Enter}
 	#IfWinActive ahk_class PuTTY Fatal Error
@@ -187,7 +165,8 @@ return
 
 return
 
-^2:: ; login
+Numpad0 & Numpad2:: ; login
+	global Title := "PuTTY"
 	PuttySend("as:", "root")
 	PuttySend("password:", "tmsoft")
 
@@ -196,7 +175,7 @@ return
 	PuttySend("password:", "tmsoft")	
 return
 
-^3::
+Numpad0 & Numpad3::
 	global Title := "PuTTY"
 	PuttySend("~#", "echo 80 > /sys/class/gpio/export")
 	PuttySend("~#", "echo in > /sys/class/gpio/gpio80/direction")
@@ -207,14 +186,15 @@ return
 
 return
 
-^4::
+Numpad0 & Numpad4::
+	global Title := "PuTTY"
 	PuttySend("~#", "cat /sys/kernel/debug/gpio")
-
 return
 
-^5::
+Numpad0 & Numpad5::
+	global Title := "PuTTY"
 	PuttySend("~#", "df -h")
-	if (PuttyRead("1.9G") != 1)
+	if (PuttyRead("3.7G") != 1)
 	{
 		Message := "Warning! `nSD-card error"
 		CheckRead := 1
@@ -222,7 +202,7 @@ return
 
 return
 
-^6::
+Numpad0 & Numpad6::
 	global Title := "AUX"
 	PuttySend("~#", "cat /dev/ttyAPP2")
 
@@ -235,6 +215,7 @@ return
 	Send, echo "AT" > /dev/ttyAPP3 {Enter}
 
 	global Title := "AUX"
+	WinActivate, AUX
 	Send, {Ctrl down}c{Ctrl up}
 	PuttySend("~#", "cat /dev/ttyAPP3")
 
@@ -249,14 +230,14 @@ return
 	Send, echo "AT" > /dev/ttyAPP2 {Enter}
 
 	global Title := "AUX"
+	WinActivate, AUX
 	Send, {Ctrl down}c{Ctrl up}
 
-	global Title := "PuTTY"
 return
 
 
-^7:: ; SIM check
-	WinActivate, PuTTY
+Numpad0 & Numpad7:: ; SIM check
+	global Title := "PuTTY"
 	Label_SIM:
 	PuttySend("~#", "gcom -d /dev/ttyAPP0")
 	PuttySend("~#", " ")
@@ -286,9 +267,9 @@ return
 	}
 return
 
-^8:: ; GSM check
+Numpad0 & Numpad8:: ; GSM check
 	WinActivate, PuTTY
-	PingDelay := 10
+	PingDelay := 1
 	BlockInput On
 	MsgBox, 0x000040,,% PingDelay "sec delay. `nInput blocked. `nStand by...", % PingDelay
 	IfMsgBox Timeout
@@ -297,13 +278,12 @@ return
 	}
 
 	Label_GSMping:
-	PuttySend("~#", "ifdown wan")
 	PuttySend("~#", "ping 8.8.8.8 -c 10")
 	PuttySend("~#", " ")
 
 	PuttyCut("time="," ms")
 	CheckCut := CaptureArf()
-	WANPingRef := 600
+	WANPingRef := 1000
 	WANPingRefMin := 45
 	CheckRead := 0
 	if (CheckCut > WANPingRef)
@@ -335,6 +315,11 @@ return
 	}
 return
 
+Numpad0 & Numpad9::
+	WinActivate, Putty
+	PuttySend("~#", "uci show mspd48.main")
+	WinActivate, Form1
+return
 ; ^0::
 ; 	Gosub ^2
 ; 	Gosub ^3

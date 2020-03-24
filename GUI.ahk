@@ -60,10 +60,12 @@ PuttyLaunch:
 return
 
 PingForm1Launch:
+    WinClose, cmd.exe
     Run C:\Windows\System32\cmd.exe /k ping -t 192.168.1.122
     Sleep, 200
     WinMove, ping, , 0, 675, 400, 300
 
+    WinClose, Form1
     Run "C:\Users\TM_SycHEVanov\Desktop\ПРОВЕРКА АСДУ\ФИНАЛЬНАЯ ПРОВЕРКА АСДУ\SerialScanerNew\Emuliator.SerialScaner.exe"
     Sleep, 200
     WinMove, Form1, , 405, 675

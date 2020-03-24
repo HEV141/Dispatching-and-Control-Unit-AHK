@@ -115,6 +115,8 @@ PuttyRead(TextToFound)
 			;MsgBox, % PuttyText
 			if InStr(PuttyText, TextToFound)
   				return 1
+			else
+				return 0
 		}
 	}
 	ClipBoard := ""
@@ -135,20 +137,16 @@ CaptureArf()
 SetTitleMatchMode, 2
 
 F12::
+	Critical On
 	MsgBox, Script is killed
 	ExitApp
 return
 
 Esc::
+	Critical On
 	MsgBox, Script is stopped
 	Exit
 return
-
-;запихать ошибки типа "Warning! `nNetwork error" в функцию через throw
-;или нет
-;подумать про кастомные сообщения ошибок
-;
-;
 
 ScrollLock::
 	try  ; Attempts to execute code.
@@ -236,7 +234,7 @@ return
 	PuttySend("~#", "ifdown wan2")
 	PuttySend("~#", "ping 8.8.8.8 -c 3")
 	PuttySend("~#", " ")
-	
+
 	CheckRead := 0 ; trigger for showing error message
 	if ((PuttyRead("Network is unreachable") = 1) or (PuttyRead("Operation not permitted") = 1))
 	{
