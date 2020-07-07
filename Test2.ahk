@@ -12,15 +12,15 @@ PuttyLaunch(Title, X, Y, Width, Height)
 	BlockInput On
 	
 	Run putty.exe
-	Sleep, 200
+	Sleep, 250
 	Send, !g ; !=Alt
 	Send, {Down}{Down}{Down}{Down}{Down}{Down}{Down}{Down}
 	Send, {Tab} %Title%
 	Send, !y ; !=Alt
-	Sleep, 100
+	Sleep, 250
 	Send, {Enter}
 	SetTitleMatchMode, 2
-	Sleep, 100
+	Sleep, 250
 	WinMove, %Title%, , %X%, %Y%, %Width%, %Height%
 
 	BlockInput Off
@@ -73,7 +73,10 @@ PuttyCut(BeginText, EndText)
 		{
 			PuttyText := A_LoopField
 			BeginPos := InStr(PuttyText, BeginText)
-			EndPos := InStr(PuttyText, EndText)
+			if EndText is Integer
+				EndPos := EndText + (BeginPos+StrLen(BeginText))
+			else
+				EndPos := InStr(PuttyText, EndText)
 			if (BeginPos != 0 and EndPos != 0)
 			{
 				MidText := SubStr(PuttyText, (BeginPos+StrLen(BeginText)), (EndPos-(BeginPos+StrLen(BeginText)))) ; extract text between BeginText and EndText
@@ -102,8 +105,6 @@ PuttyRead(TextToFound)
 			;MsgBox, % PuttyText
 			if InStr(PuttyText, TextToFound)
   				return 1
-			else
-				return 0
 		}
 	}
 	ClipBoard := ""
@@ -128,9 +129,22 @@ F12::
 	ExitApp
 return
 
-ScrollLock::
+PuttyLaunch:
+;ScrollLock::
+	BlockInput On
+
+	WinClose, AUX
+	Sleep, 500
+	WinActivate, PuTTY Exit Confirmation
+	Send, Enter
+	WinClose, PuTTY
+	Sleep, 500
+	WinActivate, PuTTY Exit Confirmation
+	Send, Enter
 	PuttyLaunch("AUX", 0, 0, 300, 610)
 	PuttyLaunch("PuTTY", 300, 0, 550, 610)
+
+	BlockInput Off
 return
 
 Esc::
@@ -138,7 +152,8 @@ Esc::
 	exit
 return
 
-Numpad0 & Numpad1::
+^1::
+;Numpad0 & Numpad1::
 	global Title := "PuTTY"
 	WinActivate, PuTTY
 	Sleep, 100
@@ -165,7 +180,8 @@ Numpad0 & Numpad1::
 
 return
 
-Numpad0 & Numpad2:: ; login
+^2::
+;Numpad0 & Numpad2:: ; login
 	global Title := "PuTTY"
 	PuttySend("as:", "root")
 	PuttySend("password:", "tmsoft")
@@ -175,7 +191,8 @@ Numpad0 & Numpad2:: ; login
 	PuttySend("password:", "tmsoft")	
 return
 
-Numpad0 & Numpad3::
+^3::
+;Numpad0 & Numpad3::
 	global Title := "PuTTY"
 	PuttySend("~#", "echo 80 > /sys/class/gpio/export")
 	PuttySend("~#", "echo in > /sys/class/gpio/gpio80/direction")
@@ -186,23 +203,43 @@ Numpad0 & Numpad3::
 
 return
 
-Numpad0 & Numpad4::
+^4::
+;Numpad0 & Numpad4::
 	global Title := "PuTTY"
+	global CaptureData
+	Label_GPIO:
 	PuttySend("~#", "cat /sys/kernel/debug/gpio")
+	Message := "Проверка портов ввода/вывода"
+	PuttyCut("gpio-80  (sysfs               ) in",4) 
+	port80 := CaptureData[1]
+	PuttyCut("gpio-120 (sysfs               ) in",4) 
+	port120 := CaptureData[1]
+	PuttyCut("gpio-121 (sysfs               ) in",4) 
+	port121 := CaptureData[1]	
+	MsgBox, 0x000136,, %Message% `ngpio-80   = %port80%`ngpio-120 = %port120%`ngpio-121 = %port121%
+		IfMsgBox Cancel
+ 		Exit
+ 	else IfMsgBox TryAgain
+ 		Goto, Label_GPIO
+ 	else
+ 		Send, {Enter}
 return
 
-Numpad0 & Numpad5::
+^5::
+;Numpad0 & Numpad5::
 	global Title := "PuTTY"
 	PuttySend("~#", "df -h")
-	if (PuttyRead("3.7G") != 1)
+	PuttySend("~#", "")
+	Sleep, 100
+	if (PuttyRead("3.7G") != 1)	
 	{
-		Message := "Warning! `nSD-card error"
+		MsgBox, 0x000040,,% "Warning! `nSD-card error"
 		CheckRead := 1
-	}	
-
+	}
 return
 
-Numpad0 & Numpad6::
+^6::
+;Numpad0 & Numpad6::
 	global Title := "AUX"
 	PuttySend("~#", "cat /dev/ttyAPP2")
 
@@ -235,8 +272,8 @@ Numpad0 & Numpad6::
 
 return
 
-
-Numpad0 & Numpad7:: ; SIM check
+^7::
+;Numpad0 & Numpad7:: ; SIM check
 	global Title := "PuTTY"
 	Label_SIM:
 	PuttySend("~#", "gcom -d /dev/ttyAPP0")
@@ -267,7 +304,8 @@ Numpad0 & Numpad7:: ; SIM check
 	}
 return
 
-Numpad0 & Numpad8:: ; GSM check
+^8::
+;Numpad0 & Numpad8:: ; GSM check
 	WinActivate, PuTTY
 	PingDelay := 1
 	BlockInput On
@@ -315,11 +353,13 @@ Numpad0 & Numpad8:: ; GSM check
 	}
 return
 
-Numpad0 & Numpad9::
-	WinActivate, Putty
+^9::
+;Numpad0 & Numpad9::
+	global Title := "PuTTY"
 	PuttySend("~#", "uci show mspd48.main")
 	WinActivate, Form1
 return
+
 ; ^0::
 ; 	Gosub ^2
 ; 	Gosub ^3

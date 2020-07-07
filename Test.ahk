@@ -115,8 +115,6 @@ PuttyRead(TextToFound)
 			;MsgBox, % PuttyText
 			if InStr(PuttyText, TextToFound)
   				return 1
-			else
-				return 0
 		}
 	}
 	ClipBoard := ""
