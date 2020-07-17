@@ -61,7 +61,7 @@ PuttyCut(BeginText, EndText)
 {
 	WinActivate, %Title%
 	global CaptureData := []
-	Sleep, 100
+	Sleep, 10
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 	ClipBoard := ""
 	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
@@ -97,6 +97,7 @@ PuttyRead(TextToFound)
 	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 	ClipWait
 	Cut := SubStr(Clipboard, -650) ; taking not whole window, otherwise need to clear window
+
 	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
 	{
 		if A_LoopField
@@ -209,20 +210,21 @@ return
 	global CaptureData
 	Label_GPIO:
 	PuttySend("~#", "cat /sys/kernel/debug/gpio")
-	Message := "Проверка портов ввода/вывода"
-	PuttyCut("gpio-80  (sysfs               ) in",4) 
-	port80 := CaptureData[1]
-	PuttyCut("gpio-120 (sysfs               ) in",4) 
-	port120 := CaptureData[1]
-	PuttyCut("gpio-121 (sysfs               ) in",4) 
-	port121 := CaptureData[1]	
-	MsgBox, 0x000136,, %Message% `ngpio-80   = %port80%`ngpio-120 = %port120%`ngpio-121 = %port121%
-		IfMsgBox Cancel
- 		Exit
- 	else IfMsgBox TryAgain
- 		Goto, Label_GPIO
- 	else
- 		Send, {Enter}
+	; Message := "Проверка портов ввода/вывода"
+	; Sleep, 70
+	; PuttyCut("gpio-80  (sysfs               ) in",4) 
+	; port80 := CaptureData[1]
+	; PuttyCut("gpio-120 (sysfs               ) in",4) 
+	; port120 := CaptureData[1]
+	; PuttyCut("gpio-121 (sysfs               ) in",4) 
+	; port121 := CaptureData[1]	
+	; MsgBox, 0x000136,, %Message% `ngpio-80   = %port80%`ngpio-120 = %port120%`ngpio-121 = %port121%
+	; 	IfMsgBox Cancel
+ 	; 	Exit
+ 	; else IfMsgBox TryAgain
+ 	; 	Goto, Label_GPIO
+ 	; else
+ 	; 	Send, {Enter}
 return
 
 ^5::
@@ -257,6 +259,7 @@ return
 	PuttySend("~#", "cat /dev/ttyAPP3")
 
 	global Title := "PuTTY"
+	Sleep, 100
 	PuttySend("~#", " ") 
 	PuttySend("~#", " ") 
 	PuttySend("~#", " ") 
