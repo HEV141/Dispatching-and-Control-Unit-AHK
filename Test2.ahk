@@ -87,23 +87,37 @@ PuttyCut(BeginText, EndText)
 	ClipBoard := ""
 }
 
-PuttyRead(TextToFound)
+PuttyRead(TextToFound, NumberOfLines:=0)
 {
 	WinActivate, %Title%
 	global CaptureData := []
+	LinesLength := []
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 	ClipBoard := ""
 	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 	ClipWait
-	Cut := SubStr(Clipboard, -650) ; taking not whole window, otherwise need to clear window
 
-	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
+	Loop, parse, Clipboard, `n, `r ; parsing text from Clipboard line by line
+	{
+		if A_LoopField
+		{
+			LinesLength.Push(StrLen(A_LoopField)) ; index = number of line, value = length of line
+		}
+	}
+	;MsgBox % LinesLength[LinesLength.MaxIndex()]
+	CutLen := -650*(NumberOfLines=0)+0*(NumberOfLines>0) ; for retrofitting all PuttyRead calls
+	Loop % NumberOfLines
+	{
+  		CutLen += LinesLength[A_Index + (LinesLength.MaxIndex() - NumberOfLines)] ; sum "lengths" of last NumberOfLines lines
+	}
+	Cut := SubStr(Clipboard, -(CutLen)) ; taking not whole window, otherwise need to clear window
+
+	Loop, parse, Cut, `n, `r
 	{
 		if A_LoopField
 		{
 			PuttyText := A_LoopField
-			;MsgBox, % PuttyText
 			if InStr(PuttyText, TextToFound)
   				return 1
 		}
@@ -279,17 +293,18 @@ return
 ;Numpad0 & Numpad7:: ; SIM check
 	global Title := "PuTTY"
 	Label_SIM:
-	PuttySend("~#", "gcom -d /dev/ttyAPP0")
+	PuttySend("~#", "gcom -d /dev/ttyUSB2")
+;	PuttySend("~#", "gcom -d /dev/ttyAPP0")
 	PuttySend("~#", " ")
 
 	CheckRead := 0
-	if (PuttyRead("ERROR") = 1)
+	if (PuttyRead("ERROR",7) = 1)
 	{
 		Message := "Warning! `nSim error"
 		CheckRead := 1
 	}
 
-	if (PuttyRead("Can't open device /dev/ttyUSB") = 1)
+	if (PuttyRead("Can't open device /dev/ttyUSB",7) = 1)
 	{
 		Message := "Warning! `nGSM module error"
 		CheckRead := 1
