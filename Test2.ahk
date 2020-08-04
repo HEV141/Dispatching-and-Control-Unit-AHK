@@ -97,8 +97,8 @@ PuttyRead(TextToFound, NumberOfLines:=0)
 	ClipBoard := ""
 	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 	ClipWait
-
-	Loop, parse, Clipboard, `n, `r ; parsing text from Clipboard line by line
+	Cut := SubStr(Clipboard, -650)
+	Loop, parse, Cut, `n, `r ; parsing text line by line
 	{
 		if A_LoopField
 		{
@@ -293,8 +293,7 @@ return
 ;Numpad0 & Numpad7:: ; SIM check
 	global Title := "PuTTY"
 	Label_SIM:
-	PuttySend("~#", "gcom -d /dev/ttyUSB2")
-;	PuttySend("~#", "gcom -d /dev/ttyAPP0")
+	PuttySend("~#", "gcom -d /dev/ttyAPP0")
 	PuttySend("~#", " ")
 
 	CheckRead := 0
