@@ -11,7 +11,6 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;TODO
     ;blocking input - maybe good idea
     ;GSM signal quality
-    ;calling subroutine that calling other subroutine seems doesn't work 
 
 Gui, New,, mini Dispatching and Control Unit | Quality Control
 Gui, Add, Text,, Проверка
@@ -21,12 +20,13 @@ Gui, Add, Progress, x80 y37 w60 h10 +Border Background%val% vUPDsign
 Gui, Add, Button, x80 y110 w60 gStart, Start
 Gui, Add, Button, x20 y110 w50 h53 gReboot, Reboot
 Gui, Add, Button, x80 y140 w60 gStop, Stop
-Gui, Add, Text, x10 y190, Статус
+Gui, Add, Text, x10 y205, Статус
 Gui, Add, Edit, w380 r5
 
 Gui, Add, Button, x160 y6 gToggleAll w40, All/None
 Gui, Add, Button, g^1 w25 h13, >>
-Gui, Add, Button, g^2 w25 h13, >>
+    Gui, Add, Button, x190 y54 g^1_1 w25 h13, >>
+Gui, Add, Button, x160 y73 g^2 w25 h13, >>
 Gui, Add, Button, g^3 w25 h13, >>
 Gui, Add, Button, g^4 w25 h13, >>
 Gui, Add, Button, g^5 w25 h13, >>
@@ -37,7 +37,8 @@ Gui, Add, Button, g9mod w25 h13, >>
 Gui, Add, Button, x290 y6 gPingForm1Launch w70, Ping/Form
 Gui, Add, Button, x370 y6 gPuttyLaunch w60, PuTTY
 Gui, Add, CheckBox, x190 y35 vCheck1 Checked, Перезапуск
-Gui, Add, CheckBox, vCheck2 Checked, Логин
+    Gui, Add, CheckBox, x220 y54 vCheck1_1 Checked, Security Alert отработка
+Gui, Add, CheckBox, x190 y73 vCheck2 Checked, Логин
 Gui, Add, CheckBox, vCheck3 Checked, Настройка портов
 Gui, Add, CheckBox, vCheck4 Checked, Проверка портов
 Gui, Add, CheckBox, vCheck5 Checked, Проверка SD-карты
@@ -45,6 +46,8 @@ Gui, Add, CheckBox, vCheck6 Checked, Echo "AT" посылка
 Gui, Add, CheckBox, vCheck7 Checked, Проверка SIM
 Gui, Add, CheckBox, vCheck8 Checked, Ping
 Gui, Add, CheckBox, vCheck9 Checked, Показать инфо об устройстве
+
+Gui, Add, ComboBox, x320 y126 vSDChoice, 1.9G|3.7G
 
 Gui, Show, x800 y4 w440 h500
 
@@ -66,10 +69,11 @@ PingForm1Launch:
 return
 
 UPDATE:
-;    Run "C:\Users\TM_SycHEVanov\Desktop\UpdateMiniAsdu\update.bat", "C:\Users\TM_SycHEVanov\Desktop\UpdateMiniAsdu"
+;no    Run "C:\Users\TM_SycHEVanov\Desktop\UpdateMiniAsdu\update.bat", "C:\Users\TM_SycHEVanov\Desktop\UpdateMiniAsdu"
     Run "C:\Users\TM_SycHEVanov\Desktop\update.bat - Ярлык"
     val := "00FF00"
     GuiControl, +Background%val%, UPDsign
+    GuiControl,, Check1_1, 0
 return
 
 9mod:
@@ -82,6 +86,8 @@ Start:
     Gui, Submit, NoHide
     if (Check1)
         Gosub ^1
+    if (Check1_1)
+        Gosub ^1_1
     if (Check2)
         Gosub ^2
     if (Check3)

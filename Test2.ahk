@@ -97,8 +97,8 @@ PuttyRead(TextToFound, NumberOfLines:=0)
 	ClipBoard := ""
 	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 	ClipWait
-	Cut := SubStr(Clipboard, -650)
-	Loop, parse, Cut, `n, `r ; parsing text line by line
+	Cut0 := SubStr(Clipboard, -650)
+	Loop, parse, Cut0, `n, `r ; parsing text line by line
 	{
 		if A_LoopField
 		{
@@ -192,7 +192,38 @@ return
 
 	Send, {Alt down}{Space}{Alt up}
 	Send, r
+return
 
+^1_1:
+	;===============================
+
+	; SecurityAlert := 1
+	; if SecurityAlert = 1
+	; {
+	; 	#IfWinActive ahk_class PuTTY Security Alert
+	; 	Loop
+	; 	{
+	; 		WinWait, PuTTY Security Alert, ,3
+	; 		if (ErrorLevel = 0) or (GetKeyState("Esc"))
+	; 			break
+	; 		else
+	; 			continue
+	; 	}
+	; 	Send, {Left} {Enter} 
+	; 	#IfWinActive
+	; 	Sleep, 5000
+	; 	#IfWinActive ahk_class PuTTY Security Alert
+	; 	Loop
+	; 	{
+	; 		WinWait, PuTTY Security Alert, ,3
+	; 		if (ErrorLevel = 0) or (GetKeyState("Esc"))
+	; 			break
+	; 		else
+	; 			continue
+	; 	}
+	; 	Send, {Left} {Enter} 
+	; 	#IfWinActive
+	; }
 return
 
 ^2::
@@ -247,7 +278,9 @@ return
 	PuttySend("~#", "df -h")
 	PuttySend("~#", "")
 	Sleep, 100
-	if (PuttyRead("3.7G") != 1)	
+	SDChoice:="1.9G"
+;	if (PuttyRead("3.7G") != 1)
+	if (PuttyRead(%SDChoice%) != 1)
 	{
 		MsgBox, 0x000040,,% "Warning! `nSD-card error"
 		CheckRead := 1
@@ -270,6 +303,7 @@ return
 	global Title := "AUX"
 	WinActivate, AUX
 	Send, {Ctrl down}c{Ctrl up}
+	
 	PuttySend("~#", "cat /dev/ttyAPP3")
 
 	global Title := "PuTTY"
@@ -352,7 +386,7 @@ return
 		CheckRead := 1
 	}
 
-	if ((PuttyRead("Network is unreachable") = 1) or (PuttyRead("Operation not permitted") = 1))
+	if ( (PuttyRead("Network is unreachable") = 1) or (PuttyRead("Operation not permitted") = 1) )
 	{
 		Message := "Warning! `nNetwork error"
 		CheckRead := 1

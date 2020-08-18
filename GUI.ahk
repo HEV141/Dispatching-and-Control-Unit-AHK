@@ -25,7 +25,7 @@ Gui, Add, Button, x80 y110 w60 gStart, Start
 Gui, Add, Button, x20 y110 w50 h53 gReboot, Reboot
 Gui, Add, Button, x80 y140 w60 gStop, Stop
 Gui, Add, Text, x10 y175, Статус
-Gui, Add, Edit, w380 r5
+Gui, Add, Edit, w380 r5, `n`nuci show mspd48.main`n`n
 
 
 Gui, Add, Button, x160 y6 gToggleAll w40, All/None
