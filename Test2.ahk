@@ -97,8 +97,8 @@ PuttyRead(TextToFound, NumberOfLines:=0)
 	ClipBoard := ""
 	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 	ClipWait
-	Cut0 := SubStr(Clipboard, -650)
-	Loop, parse, Cut0, `n, `r ; parsing text line by line
+	Cut := SubStr(Clipboard, -650)
+	Loop, parse, Cut, `n, `r ; parsing text line by line
 	{
 		if A_LoopField
 		{
