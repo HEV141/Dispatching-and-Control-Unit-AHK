@@ -106,7 +106,7 @@ PuttyRead(TextToFound, NumberOfLines:=0)
 		}
 	}
 	;MsgBox % LinesLength[LinesLength.MaxIndex()]
-	CutLen := -650*(NumberOfLines=0)+0*(NumberOfLines>0) ; for retrofitting all PuttyRead calls
+	CutLen := 650*(NumberOfLines=0)+0*(NumberOfLines>0) ; for retrofitting all PuttyRead calls
 	Loop % NumberOfLines
 	{
   		CutLen += LinesLength[A_Index + (LinesLength.MaxIndex() - NumberOfLines)] ; sum "lengths" of last NumberOfLines lines
