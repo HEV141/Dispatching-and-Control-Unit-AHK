@@ -188,6 +188,7 @@ return
 	Loop
 	{
 		WinWait, PuTTY Security Alert, ,3
+		WinActivate, PuTTY Security Alert
 		if (ErrorLevel = 0) or (GetKeyState("Esc"))
 			break
 		else

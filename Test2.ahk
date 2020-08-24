@@ -167,6 +167,39 @@ Esc::
 	exit
 return
 
+sec:
+	#IfWinActive ahk_class PuTTY Security Alert
+	Loop
+	{
+		WinWait, PuTTY Security Alert, ,3
+		WinActivate, PuTTY Security Alert
+		if (ErrorLevel = 0) or (GetKeyState("Esc"))
+			break
+		else
+			continue
+	}
+	Send, {Left} {Enter} 
+	#IfWinActive
+
+	Sleep, 100
+	
+	#IfWinActive ahk_class PuTTY Security Alert
+	Loop
+	{
+		WinWait, PuTTY Security Alert, ,3
+		WinActivate, PuTTY Security Alert
+		if (ErrorLevel = 0) or (GetKeyState("Esc"))
+			break
+		else
+			continue
+	}
+	Send, {Left} {Enter} 
+	#IfWinActive
+
+	Sleep, 100
+	
+return
+
 ^1::
 ;Numpad0 & Numpad1::
 	global Title := "PuTTY"
@@ -192,38 +225,6 @@ return
 
 	Send, {Alt down}{Space}{Alt up}
 	Send, r
-return
-
-^1_1:
-	;===============================
-
-	; SecurityAlert := 1
-	; if SecurityAlert = 1
-	; {
-	; 	#IfWinActive ahk_class PuTTY Security Alert
-	; 	Loop
-	; 	{
-	; 		WinWait, PuTTY Security Alert, ,3
-	; 		if (ErrorLevel = 0) or (GetKeyState("Esc"))
-	; 			break
-	; 		else
-	; 			continue
-	; 	}
-	; 	Send, {Left} {Enter} 
-	; 	#IfWinActive
-	; 	Sleep, 5000
-	; 	#IfWinActive ahk_class PuTTY Security Alert
-	; 	Loop
-	; 	{
-	; 		WinWait, PuTTY Security Alert, ,3
-	; 		if (ErrorLevel = 0) or (GetKeyState("Esc"))
-	; 			break
-	; 		else
-	; 			continue
-	; 	}
-	; 	Send, {Left} {Enter} 
-	; 	#IfWinActive
-	; }
 return
 
 ^2::
@@ -278,9 +279,10 @@ return
 	PuttySend("~#", "df -h")
 	PuttySend("~#", "")
 	Sleep, 100
-	SDChoice:="1.9G"
+;	SDChoice := "3.7G"
+;	SDChoice := "1.9G"
 ;	if (PuttyRead("3.7G") != 1)
-	if (PuttyRead(%SDChoice%) != 1)
+	if (PuttyRead(SDChoice) != 1)
 	{
 		MsgBox, 0x000040,,% "Warning! `nSD-card error"
 		CheckRead := 1

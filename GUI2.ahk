@@ -25,7 +25,7 @@ Gui, Add, Edit, w380 r5
 
 Gui, Add, Button, x160 y6 gToggleAll w40, All/None
 Gui, Add, Button, g^1 w25 h13, >>
-    Gui, Add, Button, x190 y54 g^1_1 w25 h13, >>
+    Gui, Add, Button, x190 y54 gsec w25 h13, >>
 Gui, Add, Button, x160 y73 g^2 w25 h13, >>
 Gui, Add, Button, g^3 w25 h13, >>
 Gui, Add, Button, g^4 w25 h13, >>
@@ -36,6 +36,7 @@ Gui, Add, Button, g^8 w25 h13, >>
 Gui, Add, Button, g9mod w25 h13, >>
 Gui, Add, Button, x290 y6 gPingForm1Launch w70, Ping/Form
 Gui, Add, Button, x370 y6 gPuttyLaunch w60, PuTTY
+
 Gui, Add, CheckBox, x190 y35 vCheck1 Checked, Перезапуск
     Gui, Add, CheckBox, x220 y54 vCheck1_1 Checked, Security Alert отработка
 Gui, Add, CheckBox, x190 y73 vCheck2 Checked, Логин
@@ -47,7 +48,7 @@ Gui, Add, CheckBox, vCheck7 Checked, Проверка SIM
 Gui, Add, CheckBox, vCheck8 Checked, Ping
 Gui, Add, CheckBox, vCheck9 Checked, Показать инфо об устройстве
 
-Gui, Add, ComboBox, x320 y126 vSDChoice, 1.9G|3.7G
+Gui, Add, ComboBox, x320 y126 vSDChoice, 1.9G||3.7G ; a|b|c - no default ; a||b|c - "a" is default
 
 Gui, Show, x800 y4 w440 h500
 
@@ -87,7 +88,7 @@ Start:
     if (Check1)
         Gosub ^1
     if (Check1_1)
-        Gosub ^1_1
+        Gosub sec
     if (Check2)
         Gosub ^2
     if (Check3)
