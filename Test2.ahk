@@ -57,7 +57,7 @@ PuttySend(WatchText, Command)
 	ClipBoard := ""
 }
 
-PuttyCut(BeginText, EndText)
+PuttyCut(BeginText, EndText) ; EndText can accept numbers of symbols to cut right after BeginText
 {
 	WinActivate, %Title%
 	global CaptureData := []
@@ -87,7 +87,7 @@ PuttyCut(BeginText, EndText)
 	ClipBoard := ""
 }
 
-PuttyRead(TextToFound, NumberOfLines:=0)
+PuttyRead(TextToFound, NumberOfLines:=0) ; optional second parameter specify numbers of lines for parsing
 {
 	WinActivate, %Title%
 	global CaptureData := []
@@ -254,23 +254,31 @@ return
 ;Numpad0 & Numpad4::
 	global Title := "PuTTY"
 	global CaptureData
+	Sleep, 70
+	PuttyCut("gpio-80  (sysfs               ) in",4) 
+	port80DEF := CaptureData[1]
+	PuttyCut("gpio-120 (sysfs               ) in",4) 
+	port120DEF := CaptureData[1]
+	PuttyCut("gpio-121 (sysfs               ) in",4) 
+	port121DEF := CaptureData[1]	
 	Label_GPIO:
 	PuttySend("~#", "cat /sys/kernel/debug/gpio")
-	; Message := "Проверка портов ввода/вывода"
-	; Sleep, 70
-	; PuttyCut("gpio-80  (sysfs               ) in",4) 
-	; port80 := CaptureData[1]
-	; PuttyCut("gpio-120 (sysfs               ) in",4) 
-	; port120 := CaptureData[1]
-	; PuttyCut("gpio-121 (sysfs               ) in",4) 
-	; port121 := CaptureData[1]	
-	; MsgBox, 0x000136,, %Message% `ngpio-80   = %port80%`ngpio-120 = %port120%`ngpio-121 = %port121%
-	; 	IfMsgBox Cancel
- 	; 	Exit
- 	; else IfMsgBox TryAgain
- 	; 	Goto, Label_GPIO
- 	; else
- 	; 	Send, {Enter}
+	
+	Message := "Проверка портов ввода/вывода"
+	Sleep, 70
+	PuttyCut("gpio-80  (sysfs               ) in",4) 
+	port80 := CaptureData[1]
+	PuttyCut("gpio-120 (sysfs               ) in",4) 
+	port120 := CaptureData[1]
+	PuttyCut("gpio-121 (sysfs               ) in",4) 
+	port121 := CaptureData[1]	
+	MsgBox, 0x000136,, %Message% `ngpio-80   = %port80% | %port80DEF%`ngpio-120 = %port120% | %port120DEF%`ngpio-121 = %port121% | %port121DEF%
+		IfMsgBox Cancel
+ 		Exit
+ 	else IfMsgBox TryAgain
+ 		Goto, Label_GPIO
+ 	else
+ 		Send, {Enter}
 return
 
 ^5::
@@ -281,7 +289,6 @@ return
 	Sleep, 100
 ;	SDChoice := "3.7G"
 ;	SDChoice := "1.9G"
-;	if (PuttyRead("3.7G") != 1)
 	if (PuttyRead(SDChoice) != 1)
 	{
 		MsgBox, 0x000040,,% "Warning! `nSD-card error"

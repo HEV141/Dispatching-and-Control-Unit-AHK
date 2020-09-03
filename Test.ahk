@@ -70,11 +70,11 @@ PuttySend(WatchText, Command)
 	ClipBoard := ""
 }
 
-PuttyCut(BeginText, EndText)
+PuttyCut(BeginText, EndText) ; EndText can accept numbers of symbols to cut right after BeginText
 {
 	WinActivate, %Title%
 	global CaptureData := []
-	Sleep, 100
+	Sleep, 10
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 	ClipBoard := ""
 	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
@@ -86,7 +86,10 @@ PuttyCut(BeginText, EndText)
 		{
 			PuttyText := A_LoopField
 			BeginPos := InStr(PuttyText, BeginText)
-			EndPos := InStr(PuttyText, EndText)
+			if EndText is Integer
+				EndPos := EndText + (BeginPos+StrLen(BeginText))
+			else
+				EndPos := InStr(PuttyText, EndText)
 			if (BeginPos != 0 and EndPos != 0)
 			{
 				MidText := SubStr(PuttyText, (BeginPos+StrLen(BeginText)), (EndPos-(BeginPos+StrLen(BeginText)))) ; extract text between BeginText and EndText
@@ -97,22 +100,37 @@ PuttyCut(BeginText, EndText)
 	ClipBoard := ""
 }
 
-PuttyRead(TextToFound)
+PuttyRead(TextToFound, NumberOfLines:=0) ; optional second parameter specify numbers of lines for parsing
 {
 	WinActivate, %Title%
 	global CaptureData := []
+	LinesLength := []
 	Sleep, 100
 	SetTitleMatchMode, 2 ; Mode 2 - "[title] contains" 
 	ClipBoard := ""
 	PostMessage, 0x112, 0x170, 0,, %Title% ; dark magic copy context of the window to the clipboard
 	ClipWait
-	Cut := SubStr(Clipboard, -650) ; taking not whole window, otherwise need to clear window
-	Loop, parse, Cut, `n, `r    ; gets the last line of text from the clipboard
+	Cut := SubStr(Clipboard, -650)
+	Loop, parse, Cut, `n, `r ; parsing text line by line
+	{
+		if A_LoopField
+		{
+			LinesLength.Push(StrLen(A_LoopField)) ; index = number of line, value = length of line
+		}
+	}
+	;MsgBox % LinesLength[LinesLength.MaxIndex()]
+	CutLen := 650*(NumberOfLines=0)+0*(NumberOfLines>0) ; for retrofitting all PuttyRead calls
+	Loop % NumberOfLines
+	{
+  		CutLen += LinesLength[A_Index + (LinesLength.MaxIndex() - NumberOfLines)] ; sum "lengths" of last NumberOfLines lines
+	}
+	Cut := SubStr(Clipboard, -(CutLen)) ; taking not whole window, otherwise need to clear window
+
+	Loop, parse, Cut, `n, `r
 	{
 		if A_LoopField
 		{
 			PuttyText := A_LoopField
-			;MsgBox, % PuttyText
 			if InStr(PuttyText, TextToFound)
   				return 1
 		}
@@ -282,13 +300,13 @@ return
 	PuttySend("~#", " ")
 
 	CheckRead := 0
-	if (PuttyRead("ERROR") = 1)
+	if (PuttyRead("ERROR",7) = 1)
 	{
 		Message := "Warning! `nSim error"
 		CheckRead := 1
 	}
 
-	if (PuttyRead("Can't open device /dev/ttyUSB") = 1)
+	if (PuttyRead("Can't open device /dev/ttyUSB",7) = 1)
 	{
 		Message := "Warning! `nGSM module error"
 		CheckRead := 1
