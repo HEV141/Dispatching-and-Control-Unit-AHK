@@ -121,6 +121,7 @@ return
 ToggleAll:
     Toggle ^= 1
     GuiControl,, Check1, % Toggle
+    GuiControl,, Check1_1, % Toggle
     GuiControl,, Check2, % Toggle
     GuiControl,, Check3, % Toggle
     GuiControl,, Check4, % Toggle

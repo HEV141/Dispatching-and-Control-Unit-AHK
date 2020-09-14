@@ -125,6 +125,7 @@ PuttyRead(TextToFound, NumberOfLines:=0) ; optional second parameter specify num
   		CutLen += LinesLength[A_Index + (LinesLength.MaxIndex() - NumberOfLines)] ; sum "lengths" of last NumberOfLines lines
 	}
 	Cut := SubStr(Clipboard, -(CutLen)) ; taking not whole window, otherwise need to clear window
+;MsgBox, %Cut% 
 
 	Loop, parse, Cut, `n, `r
 	{
@@ -201,7 +202,9 @@ return
 
 	Send, {Alt down}{Space}{Alt up}
 	Send, r
+return
 
+sec:
 	#IfWinActive ahk_class PuTTY Security Alert
 	Loop
 	{
@@ -242,18 +245,12 @@ return
 	Label_WANPing: ; yes it's label for scary horrible GOTO
 	PuttySend("~#", "                   ")
 	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
-	PuttySend("~#", "                   ")
 	PuttySend("~#", "ifdown wan2")
 	PuttySend("~#", "ping 8.8.8.8 -c 3")
 	PuttySend("~#", " ")
 
 	CheckRead := 0 ; trigger for showing error message
-	if ((PuttyRead("Network is unreachable") = 1) or (PuttyRead("Operation not permitted") = 1))
+	if ((PuttyRead("Network is unreachable",12) = 1) or (PuttyRead("Operation not permitted",12) = 1))
 	{
 		Message := "Warning! `nNetwork error"
 		CheckRead := 1

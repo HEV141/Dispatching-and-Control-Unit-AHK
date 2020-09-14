@@ -24,13 +24,14 @@ Gui, Add, Radio, gRadioCheck r1, Huawei
 Gui, Add, Button, x80 y110 w60 gStart, Start
 Gui, Add, Button, x20 y110 w50 h53 gReboot, Reboot
 Gui, Add, Button, x80 y140 w60 gStop, Stop
-Gui, Add, Text, x10 y175, Статус
+Gui, Add, Text, x10 y205, Статус
 Gui, Add, Edit, w380 r5, `n`nuci show mspd48.main`n`n
 
 
 Gui, Add, Button, x160 y6 gToggleAll w40, All/None
 Gui, Add, Button, g^1 w25 h13, >>
-Gui, Add, Button, g^2 w25 h13, >>
+    Gui, Add, Button, x190 y54 gsec w25 h13, >>
+Gui, Add, Button, x160 y73 g^2 w25 h13, >>
 Gui, Add, Button, g^3 w25 h13, >>
 Gui, Add, Button, g^4 w25 h13, >>
 Gui, Add, Button, g^5 w25 h13, >>
@@ -39,8 +40,10 @@ Gui, Add, Button, g^7 w25 h13, >>
 Gui, Add, Button, g^8 w25 h13, >>
 Gui, Add, Button, x290 y6 gPingForm1Launch w70, Ping/Form
 Gui, Add, Button, x370 y6 gPuttyLaunch w60, PuTTY
+
 Gui, Add, CheckBox, x190 y35 vCheck1 Checked, Перезапуск
-Gui, Add, CheckBox, vCheck2 Checked, Логин
+    Gui, Add, CheckBox, x220 y54 vCheck1_1 Checked, Security Alert отработка
+Gui, Add, CheckBox, x190 y73 vCheck2 Checked, Логин
 Gui, Add, CheckBox, vCheck3 Checked, Первоначальная настройка
 Gui, Add, CheckBox, vCheck4 Checked, Проверка WAN
 Gui, Add, CheckBox, vCheck5 Checked, Проверка WAN, скачивание файла
@@ -85,6 +88,8 @@ Start:
     Gui, Submit, NoHide
     if (Check1)
         Gosub ^1
+    if (Check1_1)
+        Gosub sec
     if (Check2)
         Gosub ^2
     if (Check3)
@@ -115,6 +120,7 @@ return
 ToggleAll:
     Toggle ^= 1
     GuiControl,, Check1, % Toggle
+    GuiControl,, Check1_1, % Toggle
     GuiControl,, Check2, % Toggle
     GuiControl,, Check3, % Toggle
     GuiControl,, Check4, % Toggle
