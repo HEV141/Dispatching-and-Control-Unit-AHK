@@ -254,35 +254,41 @@ return
 ;Numpad0 & Numpad4::
 	global Title := "PuTTY"
 	global CaptureData
-	Sleep, 70
+
+	PuttySend("~#", "cat /sys/kernel/debug/gpio")
+	;Sleep, 70
 	PuttyCut("gpio-80  (sysfs               ) in",4) 
 	port80DEF := CaptureData[1]
 	PuttyCut("gpio-120 (sysfs               ) in",4) 
 	port120DEF := CaptureData[1]
 	PuttyCut("gpio-121 (sysfs               ) in",4) 
 	port121DEF := CaptureData[1]	
+	
 	Label_GPIO:
 	PuttySend("~#", "cat /sys/kernel/debug/gpio")
-	
+
+
 	Message := "Проверка портов ввода/вывода"
-	Sleep, 70
+	;Sleep, 70
 	PuttyCut("gpio-80  (sysfs               ) in",4) 
 	port80 := CaptureData[1]
 	PuttyCut("gpio-120 (sysfs               ) in",4) 
 	port120 := CaptureData[1]
 	PuttyCut("gpio-121 (sysfs               ) in",4) 
 	port121 := CaptureData[1]	
-	MsgBox, 0x000136,, %Message% `ngpio-80   = %port80% | %port80DEF%`ngpio-120 = %port120% | %port120DEF%`ngpio-121 = %port121% | %port121DEF%
+	MsgBox, 0x000146,, %Message% `ngpio-80   = %port80%  |%port80DEF%`ngpio-120 = %port120%  |%port120DEF%`ngpio-121 = %port121%  |%port121DEF%
 		IfMsgBox Cancel
  		Exit
  	else IfMsgBox TryAgain
  		Goto, Label_GPIO
  	else
  		Send, {Enter}
+
 return
 
 ^5::
 ;Numpad0 & Numpad5::
+	Gui, Submit, NoHide
 	global Title := "PuTTY"
 	PuttySend("~#", "df -h")
 	PuttySend("~#", "")
@@ -291,7 +297,7 @@ return
 ;	SDChoice := "1.9G"
 	if (PuttyRead(SDChoice) != 1)
 	{
-		MsgBox, 0x000040,,% "Warning! `nSD-card error"
+		MsgBox, 0x000030,,% "Warning! `nSD-card error"
 		CheckRead := 1
 	}
 return

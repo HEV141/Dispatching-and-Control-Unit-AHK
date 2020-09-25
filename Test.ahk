@@ -6,16 +6,9 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 
 ;TODO
-	;Maybe upgrade Cut on PuttyRead and PuttyCut - set COUNT-var: for CNT ping and number of lines for copy
-		;count for number of symbols in a row, send this to SubSrt, count `n
-		
-		;or start from special symbol 
-
-		;OR clear window and MAYBE logging
-
-		;!make index array: index - number of `n, value - number of chars 
 	;GSM-module type detection Quectel/LongSung/Huawei
-	;GUI
+	;auto show uci.show after scanning bar-codes
+	;configurable X, Y, Width, Height of windows
 
 global CaptureData := []
 global Title := "PuTTY"
@@ -161,6 +154,7 @@ return
 
 Esc::
 	Critical On
+	Send, {Esc}
 	MsgBox, Script is stopped
 	Exit
 return
@@ -412,4 +406,16 @@ return
 	Gosub ^6
 	Gosub ^7
 	Gosub ^8
+return
+
+Form1Read:
+	WinWait, Form1
+	WinActivate, Form1
+	WinGetText, Form1Text
+	if GetKeyState("Enter")
+		if InStr(Form1Text, "Сохранено успешно")
+		{
+			WinActivate, PuTTY
+			Send, uci show mspd48.main{Enter}
+		}
 return
