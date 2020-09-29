@@ -51,11 +51,60 @@ Gui, Add, CheckBox, vCheck6 Checked, Проверка SIM
 Gui, Add, CheckBox, vCheck7 Checked, Проверка GSM
 Gui, Add, CheckBox, vCheck8 Checked, Финальная настройка и проверка ModBus
 
+    Menu, FileMenu, Add, &Открыть`tCtrl+O, MenuFileOpen
+    Menu, FileMenu, Add, &Сохранить`tCtrl+S, MenuFileOpen
+    Menu, FileMenu, Add, &Выход, GuiClose
+Menu, MenuBar, Add, &Файл, :FileMenu  ; Attach the two sub-menus that were created above.
+
+    Menu, WinParam, Add, &Запомнить положение, CoodrSave
+    Menu, WinParam, Add, &Окно скрипта, MenuHandler
+    Menu, WinParam, Add, &Ping, MenuHandler 
+    Menu, WinParam, Add, &Form1, MenuHandler
+    Menu, WinParam, Add, &PuTTY, MenuHandler
+    Menu, WinParam, Add, &Сброс, CoodrReset
+Menu, MenuBar, Add, &Вид, :WinParam
+
+Gui, Menu, MenuBar
+
 Gui, Show, x800 y4 w440 h500
 
 Toggle := 1
 #Include Test.ahk
 SetTitleMatchMode, 2
+return
+
+MenuFileOpen:
+return
+MenuHandler:
+return
+
+CoodrSave:
+    WinGetPos, X, Y, Width, Height, ping
+    WinGetPos, X, Y, Width, Height, Form1
+    WinGetPos, X, Y, Width, Height, PuTTY
+    WinGetPos, X, Y, Width, Height, Dispatching and Control Unit | Quality Control
+return
+
+CoodrReset:
+    IniWrite, 0, %A_ScriptDir%\config.ini, Ping_Coordinates, X
+    IniWrite, 675, %A_ScriptDir%\config.ini, Ping_Coordinates, Y
+    IniWrite, 400, %A_ScriptDir%\config.ini, Ping_Coordinates, Width
+    IniWrite, 300, %A_ScriptDir%\config.ini, Ping_Coordinates, Height
+
+    IniWrite, 405, %A_ScriptDir%\config.ini, Form1_Coordinates, X
+    IniWrite, 675, %A_ScriptDir%\config.ini, Form1_Coordinates, Y
+    IniWrite, "", %A_ScriptDir%\config.ini, Form1_Coordinates, Width
+    IniWrite, "", %A_ScriptDir%\config.ini, Form1_Coordinates, Height
+
+    IniWrite, 0, %A_ScriptDir%\config.ini, PuTTY_Coordinates, X
+    IniWrite, 0, %A_ScriptDir%\config.ini, PuTTY_Coordinates, Y
+    IniWrite, 640, %A_ScriptDir%\config.ini, PuTTY_Coordinates, Width
+    IniWrite, 675, %A_ScriptDir%\config.ini, PuTTY_Coordinates, Height
+
+    IniWrite, 800, %A_ScriptDir%\config.ini, Script_Coordinates, X
+    IniWrite, 4, %A_ScriptDir%\config.ini, Script_Coordinates, Y
+    IniWrite, 440, %A_ScriptDir%\config.ini, Script_Coordinates, Width
+    IniWrite, 500, %A_ScriptDir%\config.ini, Script_Coordinates, Height
 return
 
 PuttyLaunch:
