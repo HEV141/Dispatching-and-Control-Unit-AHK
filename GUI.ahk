@@ -13,6 +13,24 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
     ;GSM signal quality
     ;calling subroutine that calling other subroutine seems doesn't work 
 
+CoordIniWrite(SectionName, X, Y, Width, Height)
+{
+    IniWrite, %X%, %A_ScriptDir%\config.ini, %SectionName%, X
+    IniWrite, %Y%, %A_ScriptDir%\config.ini, %SectionName%, Y
+    IniWrite, %Width%, %A_ScriptDir%\config.ini, %SectionName%, Width
+    IniWrite, %Height%, %A_ScriptDir%\config.ini, %SectionName%, Height
+}
+
+CoordIniRead(SectionName)
+{
+    IniRead, X, %A_ScriptDir%\config.ini, %SectionName%, X
+    IniRead, Y, %A_ScriptDir%\config.ini, %SectionName%, Y
+    IniRead, Width, %A_ScriptDir%\config.ini, %SectionName%, Width
+    IniRead, Height, %A_ScriptDir%\config.ini, %SectionName%, Height
+    return {X: X, Y: Y, W: Width, H: Height}
+}
+
+
 Gui, New,, Dispatching and Control Unit | Quality Control
 Gui, Add, Text,, Проверка
 
@@ -66,7 +84,12 @@ Menu, MenuBar, Add, &Вид, :WinParam
 
 Gui, Menu, MenuBar
 
-Gui, Show, x800 y4 w440 h500
+CR := CoordIniRead("Script_Coordinates")
+x := CR.X ; because %CR.X% -> ERROR
+y := CR.Y
+w := CR.W
+h := CR.H
+Gui, Show, x%x% y%y% w%w% h%h%
 
 Toggle := 1
 #Include Test.ahk
@@ -80,47 +103,39 @@ return
 
 CoodrSave:
     WinGetPos, X, Y, Width, Height, ping
+    CoordIniWrite("Ping_Coordinates", X, Y, Width, Height)
     WinGetPos, X, Y, Width, Height, Form1
+    CoordIniWrite("Form1_Coordinates", X, Y, Width, Height)
     WinGetPos, X, Y, Width, Height, PuTTY
+    CoordIniWrite("PuTTY_Coordinates", X, Y, Width, Height)
     WinGetPos, X, Y, Width, Height, Dispatching and Control Unit | Quality Control
+    CoordIniWrite("Script_Coordinates", X, Y, Width, Height)
 return
 
 CoodrReset:
-    IniWrite, 0, %A_ScriptDir%\config.ini, Ping_Coordinates, X
-    IniWrite, 675, %A_ScriptDir%\config.ini, Ping_Coordinates, Y
-    IniWrite, 400, %A_ScriptDir%\config.ini, Ping_Coordinates, Width
-    IniWrite, 300, %A_ScriptDir%\config.ini, Ping_Coordinates, Height
-
-    IniWrite, 405, %A_ScriptDir%\config.ini, Form1_Coordinates, X
-    IniWrite, 675, %A_ScriptDir%\config.ini, Form1_Coordinates, Y
-    IniWrite, "", %A_ScriptDir%\config.ini, Form1_Coordinates, Width
-    IniWrite, "", %A_ScriptDir%\config.ini, Form1_Coordinates, Height
-
-    IniWrite, 0, %A_ScriptDir%\config.ini, PuTTY_Coordinates, X
-    IniWrite, 0, %A_ScriptDir%\config.ini, PuTTY_Coordinates, Y
-    IniWrite, 640, %A_ScriptDir%\config.ini, PuTTY_Coordinates, Width
-    IniWrite, 675, %A_ScriptDir%\config.ini, PuTTY_Coordinates, Height
-
-    IniWrite, 800, %A_ScriptDir%\config.ini, Script_Coordinates, X
-    IniWrite, 4, %A_ScriptDir%\config.ini, Script_Coordinates, Y
-    IniWrite, 440, %A_ScriptDir%\config.ini, Script_Coordinates, Width
-    IniWrite, 500, %A_ScriptDir%\config.ini, Script_Coordinates, Height
+    CoordIniWrite("Ping_Coordinates", 0, 675, 400, 300)
+    CoordIniWrite("Form1_Coordinates", 405, 675, "", "")
+    CoordIniWrite("PuTTY_Coordinates", 0, 0, 640, 675)
+    CoordIniWrite("Script_Coordinates", 800, 4, 440, 500)
 return
 
 PuttyLaunch:
-    PuttyLaunch("PuTTY", 0, 0, 640, 675)
+    CR := CoordIniRead("PuTTY_Coordinates")
+    PuttyLaunch("PuTTY", CR.X, CR.Y, CR.W, CR.H)
 return
 
 PingForm1Launch:
     WinClose, cmd.exe
     Run C:\Windows\System32\cmd.exe /k ping -t 192.168.1.122
+    CR := CoordIniRead("Ping_Coordinates")
     Sleep, 200
-    WinMove, ping, , 0, 675, 400, 300
+    WinMove, ping, , CR.X, CR.Y, CR.W, CR.H
 
     WinClose, Form1
     Run "C:\Users\TM_SycHEVanov\Desktop\ПРОВЕРКА АСДУ\ФИНАЛЬНАЯ ПРОВЕРКА АСДУ\SerialScanerNew\Emuliator.SerialScaner.exe"
+    CR := CoordIniRead("Form1_Coordinates")
     Sleep, 200
-    WinMove, Form1, , 405, 675
+    WinMove, Form1, , CR.X, CR.Y, CR.W, CR.H
 return
 
 RadioCheck:
