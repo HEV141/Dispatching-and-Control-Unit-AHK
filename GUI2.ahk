@@ -80,6 +80,7 @@ return
 9mod:
     val := "000000"
     GuiControl, +Background%val%, UPDsign
+    GuiControl,, Check1_1, 1
     Gosub ^9
 return
 

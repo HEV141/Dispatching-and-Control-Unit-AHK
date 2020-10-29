@@ -200,6 +200,12 @@ sec:
 	
 return
 
+CountDown:
+	Delay -= 1
+	Message1 := SubStr(Message, 1, -10)
+	ControlSetText, Static2, %Message1%%Delay% seconds, %WinLabel%
+return
+
 ^1::
 ;Numpad0 & Numpad1::
 	global Title := "PuTTY"
@@ -255,34 +261,34 @@ return
 	global Title := "PuTTY"
 	global CaptureData
 
-	PuttySend("~#", "cat /sys/kernel/debug/gpio")
-	;Sleep, 70
-	PuttyCut("gpio-80  (sysfs               ) in",4) 
-	port80DEF := CaptureData[1]
-	PuttyCut("gpio-120 (sysfs               ) in",4) 
-	port120DEF := CaptureData[1]
-	PuttyCut("gpio-121 (sysfs               ) in",4) 
-	port121DEF := CaptureData[1]	
+	; PuttySend("~#", "cat /sys/kernel/debug/gpio")
+	; ;Sleep, 70
+	; PuttyCut("gpio-80  (sysfs               ) in",4) 
+	; port80DEF := CaptureData[1]
+	; PuttyCut("gpio-120 (sysfs               ) in",4) 
+	; port120DEF := CaptureData[1]
+	; PuttyCut("gpio-121 (sysfs               ) in",4) 
+	; port121DEF := CaptureData[1]	
 	
 	Label_GPIO:
 	PuttySend("~#", "cat /sys/kernel/debug/gpio")
 
 
-	Message := "Проверка портов ввода/вывода"
-	;Sleep, 70
-	PuttyCut("gpio-80  (sysfs               ) in",4) 
-	port80 := CaptureData[1]
-	PuttyCut("gpio-120 (sysfs               ) in",4) 
-	port120 := CaptureData[1]
-	PuttyCut("gpio-121 (sysfs               ) in",4) 
-	port121 := CaptureData[1]	
-	MsgBox, 0x000146,, %Message% `ngpio-80   = %port80%  |%port80DEF%`ngpio-120 = %port120%  |%port120DEF%`ngpio-121 = %port121%  |%port121DEF%
-		IfMsgBox Cancel
- 		Exit
- 	else IfMsgBox TryAgain
- 		Goto, Label_GPIO
- 	else
- 		Send, {Enter}
+	; Message := "Проверка портов ввода/вывода"
+	; ;Sleep, 70
+	; PuttyCut("gpio-80  (sysfs               ) in",4) 
+	; port80 := CaptureData[1]
+	; PuttyCut("gpio-120 (sysfs               ) in",4) 
+	; port120 := CaptureData[1]
+	; PuttyCut("gpio-121 (sysfs               ) in",4) 
+	; port121 := CaptureData[1]	
+	; MsgBox, 0x000146,, %Message% `ngpio-80   = %port80%  |%port80DEF%`ngpio-120 = %port120%  |%port120DEF%`ngpio-121 = %port121%  |%port121DEF%
+	; 	IfMsgBox Cancel
+ 	; 	Exit
+ 	; else IfMsgBox TryAgain
+ 	; 	Goto, Label_GPIO
+ 	; else
+ 	; 	Send, {Enter}
 
 return
 
@@ -358,15 +364,23 @@ return
 		CheckRead := 1
 	}
 
+	Delay := 10 ; in seconds
+	DelayTimer := Delay*100
+	WinLabel := "Sim Check"
+	SetTimer, CountDown, %DelayTimer%
+	Message := Message . "`nRepeat after " . Delay . " seconds"
 	if (CheckRead = 1)
 	{
-		MsgBox, 0x000136,, % Message
-			IfMsgBox Cancel
+		MsgBox, 0x000136, %WinLabel%, % Message, % Delay
+			IfMsgBox Timeout
+				Goto, Label_SIM
+			else IfMsgBox Cancel
 				Exit
 			else IfMsgBox TryAgain
 				Goto, Label_SIM
 			else 
 				Send, {Enter}
+		SetTimer, CountDown, Off
 	}
 return
 
@@ -390,11 +404,19 @@ return
 	WANPingRef := 1000
 	WANPingRefMin := 45
 	CheckRead := 0
+	
+	if ((PuttyRead(" 0% packet loss") != 1))
+	{
+		Message := "Warning! `nPacket loss"
+		CheckRead := 1
+	}
+	
 	if (CheckCut > WANPingRef)
 	{
 		Message := "Warning! `nAverage ping is over " WANPingRef "ms."
 		CheckRead := 1
 	}
+	
 	if (CheckCut < WANPingRefMin) 
 	{
 		Message := "Warning! `nAverage ping is less then " WANPingRefMin "ms.`nCheck if WAN is disable"
@@ -407,15 +429,23 @@ return
 		CheckRead := 1
 	}
 
+	Delay := 10 ; in seconds
+	DelayTimer := Delay*100
+	WinLabel := "GSM Check"
+	SetTimer, CountDown, %DelayTimer%
+	Message := Message . "`nRepeat after " . Delay . " seconds"
 	if (CheckRead = 1)
 	{
-		MsgBox, 0x000136,, % Message
-			IfMsgBox Cancel
+		MsgBox, 0x000136, %WinLabel%, % Message, % Delay
+			IfMsgBox Timeout
+				Goto, Label_GSMPing
+			else IfMsgBox Cancel
 				Exit
 			else IfMsgBox TryAgain
 				Goto, Label_GSMPing
 			else 
 				Send, {Enter}
+		SetTimer, CountDown, Off
 	}
 return
 

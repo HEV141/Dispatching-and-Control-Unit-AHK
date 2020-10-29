@@ -8,11 +8,6 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;Ctrl+K+C
 ;Ctrl+K+U
 
-;TODO
-    ;blocking input - maybe good idea
-    ;GSM signal quality
-    ;calling subroutine that calling other subroutine seems doesn't work 
-
 CoordIniWrite(SectionName, X, Y, Width, Height)
 {
     IniWrite, %X%, %A_ScriptDir%\config.ini, %SectionName%, X
@@ -43,7 +38,7 @@ Gui, Add, Button, x80 y110 w60 gStart, Start
 Gui, Add, Button, x20 y110 w50 h53 gReboot, Reboot
 Gui, Add, Button, x80 y140 w60 gStop, Stop
 Gui, Add, Text, x10 y205, Статус
-Gui, Add, Edit, w380 r5, `n`nuci show mspd48.main`n`n
+Gui, Add, Edit, w380 r7, `nls -l /dev/ttyUSB*`n`nlogread -e Modbus`n`n`nuci show mspd48.main`n`n
 
 
 Gui, Add, Button, x160 y6 gToggleAll w40, All/None

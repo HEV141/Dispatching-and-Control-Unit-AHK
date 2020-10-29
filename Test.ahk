@@ -9,6 +9,9 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 	;GSM-module type detection Quectel/LongSung/Huawei
 	;auto show uci.show after scanning bar-codes
 	;configurable X, Y, Width, Height of windows
+	;logging
+	;skip step
+	;auto continue in 5-10 sec after error
 
 global CaptureData := []
 global Title := "PuTTY"
@@ -152,37 +155,57 @@ F12::
 	ExitApp
 return
 
-Esc::
-	Critical On
-	Send, {Esc}
-	MsgBox, Script is stopped
-	Exit
-return
+; Esc::
+; 	Critical On
+; 	Send, {Esc}
+; 	MsgBox, Script is stopped
+; 	Exit
+; return
 
 ScrollLock::
-	try  ; Attempts to execute code.
-	{
-		test := 2
-		HelloWorld()
-		MakeToast(test)
-	}
-	catch e  ; Handles the first error/exception raised by the block above.
-	{
-		MsgBox, An exception was thrown!`nSpecifically: %e%
-		Exit
-	}
 
-	HelloWorld()  ; Always succeeds.
-	{
-		MsgBox, Hello, world!
-	}
+	Delay := 10 ; in seconds
+	DelayTimer := Delay*100
+	WinLabel := "Example"
+	SetTimer, CountDown1, %DelayTimer%
+	MsgBox, 0x000040, %WinLabel%, Here is the countdown -> %Delay%, %Delay%
+	SetTimer, CountDown, Off
+	Return
 
-	MakeToast(test)  ; Always fails.
-	{
-		; Jump immediately to the try block's error handler:
-		if (test = 2)
-			throw A_ThisFunc " is not implemented, sorry"
-	}
+	CountDown1:
+	Delay -= 1
+	ControlSetText, Static2, Here is the countdown -> %Delay%, %WinLabel%
+	Return
+
+	; try  ; Attempts to execute code.
+	; {
+	; 	test := 2
+	; 	HelloWorld()
+	; 	MakeToast(test)
+	; }
+	; catch e  ; Handles the first error/exception raised by the block above.
+	; {
+	; 	MsgBox, An exception was thrown!`nSpecifically: %e%
+	; 	Exit
+	; }
+
+	; HelloWorld()  ; Always succeeds.
+	; {
+	; 	MsgBox, Hello, world!
+	; }
+
+	; MakeToast(test)  ; Always fails.
+	; {
+	; 	; Jump immediately to the try block's error handler:
+	; 	if (test = 2)
+	; 		throw A_ThisFunc " is not implemented, sorry"
+	; }
+return    
+
+CountDown:
+	Delay -= 1
+	Message1 := SubStr(Message, 1, -10)
+	ControlSetText, Static2, %Message1%%Delay% seconds, %WinLabel%
 return
 
 ^1::
@@ -194,6 +217,7 @@ return
 		Send, {Enter}
 	#IfWinActive
 
+	WinActivate, PuTTY
 	Send, {Alt down}{Space}{Alt up}
 	Send, r
 return
@@ -303,15 +327,23 @@ return
 		CheckRead := 1
 	}
 
+	Delay := 10 ; in seconds
+	DelayTimer := Delay*100
+	WinLabel := "Sim Check"
+	SetTimer, CountDown, %DelayTimer%
+	Message := Message . "`nRepeat after " . Delay . " seconds"
 	if (CheckRead = 1)
 	{
-		MsgBox, 0x000136,, % Message
-			IfMsgBox Cancel
+		MsgBox, 0x000136, %WinLabel%, % Message, % Delay
+			IfMsgBox Timeout
+				Goto, Label_SIM
+			else IfMsgBox Cancel
 				Exit
 			else IfMsgBox TryAgain
 				Goto, Label_SIM
 			else 
 				Send, {Enter}
+		SetTimer, CountDown, Off
 	}
 return
 
@@ -325,7 +357,7 @@ return
 		BlockInput Off
 	}
 
-	Label_GSMping:
+	Label_GSMping: 
 	PuttySend("~#", "ifdown wan")
 	PuttySend("~#", "ping 8.8.8.8 -c 10")
 	PuttySend("~#", " ")
@@ -335,11 +367,19 @@ return
 	WANPingRef := 600
 	WANPingRefMin := 45
 	CheckRead := 0
+
+	if ((PuttyRead(" 0% packet loss") != 1))
+	{
+		Message := "Warning! `nPacket loss"
+		CheckRead := 1
+	}
+
 	if (CheckCut > WANPingRef)
 	{
 		Message := "Warning! `nAverage ping is over " WANPingRef "ms."
 		CheckRead := 1
 	}
+
 	if (CheckCut < WANPingRefMin) 
 	{
 		Message := "Warning! `nAverage ping is less then " WANPingRefMin "ms.`nCheck if WAN is disable"
@@ -352,15 +392,23 @@ return
 		CheckRead := 1
 	}
 
+	Delay := 10 ; in seconds
+	DelayTimer := Delay*100
+	WinLabel := "GSM Check"
+	SetTimer, CountDown, %DelayTimer%
+	Message := Message . "`nRepeat after " . Delay . " seconds"
 	if (CheckRead = 1)
 	{
-		MsgBox, 0x000136,, % Message
-			IfMsgBox Cancel
+		MsgBox, 0x000136, %WinLabel%, % Message, % Delay
+			IfMsgBox Timeout
+				Goto, Label_GSMPing
+			else IfMsgBox Cancel
 				Exit
 			else IfMsgBox TryAgain
 				Goto, Label_GSMPing
 			else 
 				Send, {Enter}
+		SetTimer, CountDown, Off
 	}
 return
 
@@ -408,14 +456,15 @@ return
 	Gosub ^8
 return
 
-Form1Read:
+F1::
 	WinWait, Form1
 	WinActivate, Form1
 	WinGetText, Form1Text
-	if GetKeyState("Enter")
-		if InStr(Form1Text, "Сохранено успешно")
-		{
-			WinActivate, PuTTY
-			Send, uci show mspd48.main{Enter}
-		}
+	MsgBox, % Form1Text
+	; if GetKeyState("Enter")
+	; 	if InStr(Form1Text, "Сохранено успешно")
+	; 	{
+	; 		WinActivate, PuTTY
+	; 		Send, uci show mspd48.main{Enter}
+	; 	}
 return
