@@ -155,11 +155,12 @@ F12::
 	ExitApp
 return
 
-; Esc::
+; ~Esc::
 ; 	Critical On
-; 	Send, {Esc}
+; 	Exit
 ; 	MsgBox, Script is stopped
 ; 	Exit
+; 	Critical Off
 ; return
 
 ScrollLock::
@@ -246,6 +247,27 @@ return
 ^3:: ; setup
 	WinActivate, PuTTY
 	Send, {Enter}
+
+	if (AutoModem = 1)
+	{
+		PuttySend("~#", "logread -e Quectel")
+		if (PuttyRead(": Quectel") = 1)
+			Modem := Quectel
+		else
+		{
+			PuttySend("~#", "logread -e LONGSUNG")
+			if (PuttyRead(": LONGSUNG") = 1)
+				Modem := LongSung
+			else
+			{
+				PuttySend("~#", "logread -e Huawei")
+				if (PuttyRead(": Huawei") = 1)
+					Modem := Huawei
+				else MsgBox, Error `nCan't detect Modem manufacturer
+			}
+		}
+	}
+
 	switch Modem
 	{
 		case "Quectel": PuttySend("~#", "uci set network.wan2.device='/dev/ttyUSB3'")
@@ -357,7 +379,7 @@ return
 		BlockInput Off
 	}
 
-	Label_GSMping: 
+	Label_GSMping:
 	PuttySend("~#", "ifdown wan")
 	PuttySend("~#", "ping 8.8.8.8 -c 10")
 	PuttySend("~#", " ")
@@ -439,8 +461,11 @@ return
 					}
 			break
 		}
-		if (GetKeyState("Esc"))
+		if GetKeyState("Esc")
+		{
+			MsgBox, Script stopped
 			break
+		}
 	}
 	ClipBoard := ""
 
@@ -456,15 +481,55 @@ return
 	Gosub ^8
 return
 
-F1::
+uciShow:
 	WinWait, Form1
-	WinActivate, Form1
-	WinGetText, Form1Text
-	MsgBox, % Form1Text
-	; if GetKeyState("Enter")
-	; 	if InStr(Form1Text, "Сохранено успешно")
-	; 	{
-	; 		WinActivate, PuTTY
-	; 		Send, uci show mspd48.main{Enter}
-	; 	}
+	;MsgBox, % Form1Text
+	Sleep, 200
+	loop
+	{
+		WinActivate, Form1
+		WinGetText, Form1Text
+		if InStr(Form1Text, "Сохранено успешно:")
+		{
+			WinActivate, PuTTY
+			Send,{Enter}{Enter}{Enter}
+			Send, uci show mspd48.main{Enter}
+			Send,{Enter}{Enter}{Enter}
+			break
+		}
+		if GetKeyState("Esc")
+		{
+			MsgBox, Script stopped
+			break
+		}
+	}
+
+	;; Take S/N of ASDU and MKADD inside PuTTY window instead of this:
+
+	; SN_ASDUPos := InStr(Form1Text, "ASDU")
+	; SN_MKADDPos := InStr(Form1Text, "MKADD")
+	; MsgBox, "ASDU" %SN_ASDUPos% "MKADD" %SN_MKADDPos%
+	; SubStr(Form1Text, SN_ASDUPos, 14)
+	; SubStr(Form1Text, SN_MKADDPos, 10)
+return
+
+~Lbutton::
+	MouseGetPos,,,, ControlUnderMouse
+	if (ControlUnderMouse == "WindowsForms10.BUTTON.app.0.2bf8098_r11_ad11")
+		;MsgBox, gotcha
+		Gosub uciShow
+return
+
+~Enter::
+	ControlGetFocus, ControlUnder, Form1
+	if (ControlUnder == "WindowsForms10.BUTTON.app.0.2bf8098_r11_ad11")
+		;MsgBox, gotcha enterkey
+		Gosub uciShow
+return
+
+~NumpadEnter::
+	ControlGetFocus, ControlUnder, Form1
+	if (ControlUnder == "WindowsForms10.BUTTON.app.0.2bf8098_r11_ad11")
+		;MsgBox, gotcha enterkey
+		Gosub uciShow
 return

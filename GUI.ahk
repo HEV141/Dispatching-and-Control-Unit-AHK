@@ -29,14 +29,16 @@ CoordIniRead(SectionName)
 Gui, New,, Dispatching and Control Unit | Quality Control
 Gui, Add, Text,, Проверка
 
+Gui, Add, CheckBox, x10 y25 gAutoModem Checked, Автодетекция модема
+
 Gui, Add, GroupBox, r3, Модем:
 Gui, Add, Radio, gRadioCheck vRadioGr Group Checked xp+10 yp+20 r1, Quectel
 Gui, Add, Radio, gRadioCheck r1, Long Sung
 Gui, Add, Radio, gRadioCheck r1, Huawei
 
-Gui, Add, Button, x80 y110 w60 gStart, Start
-Gui, Add, Button, x20 y110 w50 h53 gReboot, Reboot
-Gui, Add, Button, x80 y140 w60 gStop, Stop
+Gui, Add, Button, x80 y130 w60 gStart, Start
+Gui, Add, Button, x20 y130 w50 h53 gReboot, Reboot
+Gui, Add, Button, x80 y160 w60 gStop, Stop
 Gui, Add, Text, x10 y205, Статус
 Gui, Add, Edit, w380 r7, `nls -l /dev/ttyUSB*`n`nlogread -e Modbus`n`n`nuci show mspd48.main`n`n
 
@@ -86,7 +88,11 @@ w := CR.W
 h := CR.H
 Gui, Show, x%x% y%y% w%w% h%h%
 
+GuiControl, Disable, Quectel
+GuiControl, Disable, Long Sung
+GuiControl, Disable, Huawei
 Toggle := 1
+AutoModem := 1
 #Include Test.ahk
 SetTitleMatchMode, 2
 return
@@ -131,6 +137,23 @@ PingForm1Launch:
     CR := CoordIniRead("Form1_Coordinates")
     Sleep, 200
     WinMove, Form1, , CR.X, CR.Y, CR.W, CR.H
+return
+
+AutoModem:
+    AutoModem ^= 1
+    if AutoModem
+    {
+        GuiControl, Disable, Quectel
+        GuiControl, Disable, Long Sung
+        GuiControl, Disable, Huawei
+    }
+    else
+    {
+        GuiControl, Enable, Quectel
+        GuiControl, Enable, Long Sung
+        GuiControl, Enable, Huawei
+    }
+    Gui, Submit, NoHide
 return
 
 RadioCheck:
