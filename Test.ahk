@@ -51,8 +51,8 @@ PuttySend(WatchText, Command)
 				PuttyText := A_LoopField
 		}
 		PuttyText := SubStr(PuttyText, -(StrLen(WatchText)-1)) ; cut end of the line and check to match with WatchText
-		if (PuttyText = WatchText) or (GetKeyState("Esc"))	; need because AHK executing too fast and picking up whole context of previous line
-			break											; also proper response to random lag (in theory)
+		if (PuttyText = WatchText) or (GetKeyState("Esc"))	; need because AHK executing too fast and picking up whole context of previous line; also proper response to random lag (in theory)
+			break ; don't need message because in this case Esc not breaking the loop
 		else
 			continue
 	}
@@ -230,7 +230,10 @@ sec:
 		WinWait, PuTTY Security Alert, ,3
 		WinActivate, PuTTY Security Alert
 		if (ErrorLevel = 0) or (GetKeyState("Esc"))
+		{
+			MsgBox, Script stopped
 			break
+		}
 		else
 			continue
 	}
