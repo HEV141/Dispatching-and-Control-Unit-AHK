@@ -178,7 +178,7 @@ sec:
 		else
 			continue
 	}
-	Send, {Left} {Enter} 
+	Send, {Left} {Left} {Enter} 
 	#IfWinActive
 
 	Sleep, 100
@@ -193,7 +193,7 @@ sec:
 		else
 			continue
 	}
-	Send, {Left} {Enter} 
+	Send, {Left} {Left} {Enter} 
 	#IfWinActive
 
 	Sleep, 100
@@ -465,3 +465,48 @@ return
 ; 	Gosub ^7
 ; 	Gosub ^8
 ; return
+
+uciShow:
+	WinWait, Form1
+	;MsgBox, % Form1Text
+	Sleep, 200
+	loop
+	{
+		WinActivate, Form1
+		WinGetText, Form1Text
+		if InStr(Form1Text, "Сохранено успешно:")
+		{
+			WinActivate, PuTTY
+			Send,{Enter}{Enter}{Enter}
+			Send, uci show mspd48.main{Enter}
+			Send,{Enter}{Enter}{Enter}
+			break
+		}
+		if GetKeyState("Esc")
+		{
+			MsgBox, Script stopped
+			break
+		}
+	}
+return
+
+~Lbutton::
+	MouseGetPos,,,, ControlUnderMouse
+	if (ControlUnderMouse == "WindowsForms10.BUTTON.app.0.2bf8098_r11_ad11")
+		;MsgBox, gotcha
+		Gosub uciShow
+return
+
+~Enter::
+	ControlGetFocus, ControlUnder, Form1
+	if (ControlUnder == "WindowsForms10.BUTTON.app.0.2bf8098_r11_ad11")
+		;MsgBox, gotcha enterkey
+		Gosub uciShow
+return
+
+~NumpadEnter::
+	ControlGetFocus, ControlUnder, Form1
+	if (ControlUnder == "WindowsForms10.BUTTON.app.0.2bf8098_r11_ad11")
+		;MsgBox, gotcha enterkey
+		Gosub uciShow
+return

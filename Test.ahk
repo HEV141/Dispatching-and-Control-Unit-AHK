@@ -7,14 +7,13 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ;TODO
 	;GSM-module type detection Quectel/LongSung/Huawei
-	;auto show uci.show after scanning bar-codes
-	;configurable X, Y, Width, Height of windows
 	;logging
 	;skip step
-	;auto continue in 5-10 sec after error
 
 global CaptureData := []
 global Title := "PuTTY"
+StatusMsg := "TestMsg"
+GuiControl,, StatusMsgBar, %StatusMsg%
 
 PuttyLaunch(Title, X, Y, Width, Height)
 {
@@ -66,7 +65,7 @@ PuttySend(WatchText, Command)
 	ClipBoard := ""
 }
 
-PuttyCut(BeginText, EndText) ; EndText can accept numbers of symbols to cut right after BeginText
+PuttyCut(BeginText, EndText) ; EndText can accept number of symbols to cut right after BeginText
 {
 	WinActivate, %Title%
 	global CaptureData := []
@@ -96,7 +95,7 @@ PuttyCut(BeginText, EndText) ; EndText can accept numbers of symbols to cut righ
 	ClipBoard := ""
 }
 
-PuttyRead(TextToFound, NumberOfLines:=0) ; optional second parameter specify numbers of lines for parsing
+PuttyRead(TextToFound, NumberOfLines:=0) ; optional second parameter specify number of lines for parsing
 {
 	WinActivate, %Title%
 	global CaptureData := []
@@ -165,6 +164,7 @@ return
 
 ScrollLock::
 
+	StatusMsg := "TestMsg"
 	Delay := 10 ; in seconds
 	DelayTimer := Delay*100
 	WinLabel := "Example"
@@ -227,17 +227,20 @@ sec:
 	#IfWinActive ahk_class PuTTY Security Alert
 	Loop
 	{
+		StatusMsg := "Ожидание окна PuTTY Security Alert"
+		GuiControl,, StatusMsgBar, %StatusMsg%
+		
 		WinWait, PuTTY Security Alert, ,3
 		WinActivate, PuTTY Security Alert
 		if (ErrorLevel = 0) or (GetKeyState("Esc"))
-		{
-			MsgBox, Script stopped
-			break
-		}
+			break ; don't need message because in this case Esc not breaking the loop
 		else
 			continue
 	}
-	Send, {Left} {Enter} 
+	StatusMsg := ""
+	GuiControl,, StatusMsgBar, %StatusMsg%
+
+	Send, {Left} {Left} {Enter} 
 	#IfWinActive
 return
 
@@ -451,6 +454,8 @@ return
 
 	loop
 	{
+		StatusMsg := "Ожидание реакции ModBus"
+		GuiControl,, StatusMsgBar, %StatusMsg%
 		if (PuttyRead("1990") = 1)
 		{
 			SoundBeep
@@ -470,6 +475,8 @@ return
 			break
 		}
 	}
+	StatusMsg := ""
+	GuiControl,, StatusMsgBar, %StatusMsg%
 	ClipBoard := ""
 
 return
@@ -490,6 +497,13 @@ uciShow:
 	Sleep, 200
 	loop
 	{
+		If WinExist("Предупреждение!")
+		{
+			loop
+			{
+				WinActivate, Предупреждение!
+			}
+		}
 		WinActivate, Form1
 		WinGetText, Form1Text
 		if InStr(Form1Text, "Сохранено успешно:")
