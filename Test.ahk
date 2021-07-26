@@ -12,8 +12,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 global CaptureData := []
 global Title := "PuTTY"
-StatusMsg := "TestMsg"
-GuiControl,, StatusMsgBar, %StatusMsg%
+
+GuiControl,, StatusMsgBar, TestMsg
 
 PuttyLaunch(Title, X, Y, Width, Height)
 {
@@ -210,6 +210,8 @@ CountDown:
 return
 
 ^1::
+	GuiControl,, StatusMsgBar, Перезапуск окна PuTTY
+
 	WinActivate, PuTTY
 	Sleep, 100
 	Send, {Enter}
@@ -221,14 +223,15 @@ return
 	WinActivate, PuTTY
 	Send, {Alt down}{Space}{Alt up}
 	Send, r
+
+	GuiControl,, StatusMsgBar,
 return
 
 sec:
 	#IfWinActive ahk_class PuTTY Security Alert
 	Loop
 	{
-		StatusMsg := "Ожидание окна PuTTY Security Alert"
-		GuiControl,, StatusMsgBar, %StatusMsg%
+		GuiControl,, StatusMsgBar, [Цикл] Ожидание окна PuTTY Security Alert
 		
 		WinWait, PuTTY Security Alert, ,3
 		WinActivate, PuTTY Security Alert
@@ -237,17 +240,20 @@ sec:
 		else
 			continue
 	}
-	StatusMsg := ""
-	GuiControl,, StatusMsgBar, %StatusMsg%
+	GuiControl,, StatusMsgBar, 
 
 	Send, {Left} {Left} {Enter} 
 	#IfWinActive
 return
 
 ^2:: ; login
+	GuiControl,, StatusMsgBar, Логин
+
 	WinActivate, PuTTY
 	PuttySend("as:", "root")
 	PuttySend("password:", "tmsoft")
+
+	GuiControl,, StatusMsgBar,
 return
 
 ^3:: ; setup
@@ -273,6 +279,7 @@ return
 			}
 		}
 	}
+	GuiControl,, StatusMsgBar, Настройка в соответствии с выбранным модемом
 
 	switch Modem
 	{
@@ -281,12 +288,17 @@ return
 		case "Huawei": PuttySend("~#", "uci set network.wan2.device='/dev/ttyUSB0'")
 		Default: PuttySend("~#", "uci set network.wan2.device='/dev/ttyUSB3'")
 	}
+
 	PuttySend("~#", "uci delete network.lan.gateway")
 	PuttySend("~#", "uci commit")
 	PuttySend("~#", "/etc/init.d/network reload")
+
+	GuiControl,, StatusMsgBar,
 return
 
 ^4:: ; WAN check
+	GuiControl,, StatusMsgBar, Тест проводной передачи
+
 	WinActivate, PuTTY
 	Label_WANPing: ; yes it's label for scary horrible GOTO
 	PuttySend("~#", "                   ")
@@ -321,14 +333,22 @@ return
 			else 
 				Send, {Enter}
 	}
+
+	GuiControl,, StatusMsgBar,
 return
 
 ^5:: ; WAN check file download
+	GuiControl,, StatusMsgBar, Тест проводной передачи; скачивание файла
+
 	WinActivate, PuTTY
 	PuttySend("~#", "wget --no-check-certificate -P /tmp http://4duker.ru/1.bmp")
+
+	GuiControl,, StatusMsgBar,
 return
 
 ^6:: ; SIM check
+	GuiControl,, StatusMsgBar, Проверка SIM
+
 	WinActivate, PuTTY
 	PuttySend("~#", "ifup wan2")
 	PuttySend("~#", "ifdown wan")
@@ -373,9 +393,13 @@ return
 				Send, {Enter}
 		SetTimer, CountDown, Off
 	}
+
+	GuiControl,, StatusMsgBar,
 return
 
 ^7:: ; GSM check
+	GuiControl,, StatusMsgBar, Проверка беспроводной передачи
+
 	WinActivate, PuTTY
 	PingDelay := 10
 	BlockInput On
@@ -438,9 +462,13 @@ return
 				Send, {Enter}
 		SetTimer, CountDown, Off
 	}
+
+	GuiControl,, StatusMsgBar,
 return
 
 ^8:: ; final setup, ModBus/MKADD/MTRDD check - val=1990
+	GuiControl,, StatusMsgBar, Финальная настройка
+
 	WinActivate, PuTTY
 	PuttySend("~#", "ifup wan")
 	PuttySend("~#", "ifup wan2")
@@ -452,10 +480,11 @@ return
 	PuttySend("~#", "/etc/init.d/mspd48 restart")
 	ClipBoard := ""
 
+	GuiControl,, StatusMsgBar,
 	loop
 	{
-		StatusMsg := "Ожидание реакции ModBus"
-		GuiControl,, StatusMsgBar, %StatusMsg%
+		GuiControl,, StatusMsgBar, [Цикл] Ожидание реакции ModBus
+
 		if (PuttyRead("1990") = 1)
 		{
 			SoundBeep
@@ -475,8 +504,8 @@ return
 			break
 		}
 	}
-	StatusMsg := ""
-	GuiControl,, StatusMsgBar, %StatusMsg%
+	GuiControl,, StatusMsgBar, 
+
 	ClipBoard := ""
 
 return
